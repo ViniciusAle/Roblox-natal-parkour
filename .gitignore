@@ -1,0 +1,14 @@
+# Builds do Rojo
+*.rbxl
+*.rbxlx
+*.rbxm
+*.rbxmx
+!assets/**
+
+# Sistema
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+sourcemap.json
