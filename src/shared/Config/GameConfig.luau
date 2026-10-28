@@ -258,6 +258,9 @@ local GameConfig = {
 	Dev = {
 		-- No Studio todos os heróis e capítulos ficam liberados, para testar
 		UnlockAllInStudio = true,
+		-- Fase de testes: todos os personagens liberados também no jogo publicado (ainda não há loja nem ovos).
+		-- Desligar quando existir um jeito de desbloquear.
+		UnlockAllHeroes = true,
 		LagLogInStudio = true, -- frames lentos da corrida aparecem no Output ([Lag])
 		StudioUpgrades = { DoubleJump = 1, ExtraLife = 0, MagnetPower = 2 },
 	},

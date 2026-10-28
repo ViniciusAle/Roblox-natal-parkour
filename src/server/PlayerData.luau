@@ -39,7 +39,7 @@ local function newProfile(): Profile
 		upgrades = {},
 	}
 	for id, hero in Heroes.ById do
-		profile.ownedHeroes[id] = hero.freeByDefault or unlockAll
+		profile.ownedHeroes[id] = hero.freeByDefault or unlockAll or GameConfig.Dev.UnlockAllHeroes
 	end
 	for id, chapter in Chapters.ById do
 		profile.ownedChapters[id] = chapter.freeByDefault or unlockAll
