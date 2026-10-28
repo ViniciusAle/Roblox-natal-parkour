@@ -23,7 +23,7 @@ local Match = GameConfig.Match
 local IS_STUDIO = RunService:IsStudio()
 local MIN_PLAYERS = if IS_STUDIO then Match.StudioMinPlayers else Match.MinPlayers
 local COUNTDOWN = if IS_STUDIO then Match.StudioCountdownSeconds else Match.CountdownSeconds
-local LANE_LIMIT = GameConfig.Track.LaneWidth * 1.5
+local LANE_LIMIT = GameConfig.Track.LaneWidth * GameConfig.Track.LaneCount / 2
 
 type Participant = {
 	finished: boolean,

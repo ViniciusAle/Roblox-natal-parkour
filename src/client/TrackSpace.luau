@@ -19,8 +19,11 @@ function TrackSpace.cframe(x: number, y: number, distance: number): CFrame
 	return CFrame.new(ORIGIN.X + x, ORIGIN.Y + y, ORIGIN.Z - distance)
 end
 
+-- Pista do meio (largada e revive)
+TrackSpace.CenterLane = (GameConfig.Track.LaneCount + 1) / 2
+
 function TrackSpace.laneX(lane: number): number
-	return (lane - 2) * GameConfig.Track.LaneWidth
+	return (lane - TrackSpace.CenterLane) * GameConfig.Track.LaneWidth
 end
 
 return TrackSpace

@@ -10,7 +10,7 @@ local PropAssembler = require(Shared.PropAssembler)
 local TrackSpace = require(script.Parent.TrackSpace)
 
 local BOX = Vector3.new(3.6, 7, 2.6)
-local DEFAULT_RECIPE = "ChaserKrampus"
+local DEFAULT_RECIPE = "ChaserShadow"
 
 type ViewData = {
 	parent: Instance,

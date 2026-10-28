@@ -1,5 +1,5 @@
 --!strict
--- Ponto de entrada do cliente: vila (lobby) -> corrida solo ou multiplayer -> resultado -> vila.
+-- Ponto de entrada do cliente: logo -> vila (lobby) -> corrida solo ou multiplayer -> resultado -> vila.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -10,6 +10,8 @@ local Shared = ReplicatedStorage.Shared
 local GameConfig = require(Shared.Config.GameConfig)
 local Chapters = require(Shared.Config.Chapters)
 local Heroes = require(Shared.Config.Heroes)
+local Rarities = require(Shared.Config.Rarities)
+local SoundIds = require(Shared.Config.Sounds)
 local Strings = require(Shared.Config.Strings)
 local Remotes = require(Shared.Remotes)
 local Types = require(Shared.Types)
@@ -17,9 +19,11 @@ local Types = require(Shared.Types)
 local CharacterLock = require(script.Parent.CharacterLock)
 local Hud = require(script.Parent.Hud)
 local Input = require(script.Parent.Input)
+local Music = require(script.Parent.Music)
 local RunSession = require(script.Parent.RunSession)
+local UiKit = require(script.Parent.UiKit)
 
-local RENDER_STEP = "LivroDeNatalRun"
+local RENDER_STEP = "AnimeRacersRun"
 local MATCH_REFRESH = 0.25
 
 type Mode = "Lobby" | "Solo" | "Race"
@@ -46,7 +50,14 @@ local function chapterId(): string
 end
 
 local function refreshLobby()
-	hud:setSelection(Strings.Heroes[heroId()] or heroId(), Strings.Chapters[chapterId()] or chapterId())
+	local hero = Heroes.ById[heroId()]
+	local rarity = Rarities.ById[hero.rarity]
+	hud:setSelection(
+		Strings.Heroes[hero.id] or hero.id,
+		Strings.Rarities[hero.rarity] or hero.rarity,
+		if rarity then rarity.color else Color3.new(1, 1, 1),
+		Strings.Chapters[chapterId()] or chapterId()
+	)
 end
 
 local function stopSession()
@@ -91,6 +102,7 @@ local function onRunEnded(report: Types.RunReport, _reason: RunSession.EndReason
 			mode = "Lobby"
 			hud:showScreen("Lobby")
 			hud:setStatus(Strings.StartFailed)
+			Music.play("Lobby")
 		end
 	end)
 end
@@ -139,6 +151,7 @@ local function backToVillage()
 	refreshLobby()
 	hud:setStatus("")
 	hud:showScreen("Lobby")
+	Music.play("Lobby")
 end
 
 local function refreshMatchBanner()
@@ -241,6 +254,22 @@ task.spawn(function()
 	end
 end)
 
+-- Som de clique de todos os botões
+local clickId = SoundIds.Effects.UiClick
+if clickId and clickId ~= "" then
+	local click = Instance.new("Sound")
+	click.Name = "UiClick"
+	click.SoundId = clickId
+	click.Volume = SoundIds.Volumes.UiClick or 1
+	click.Parent = script
+	UiKit.setClickSound(click)
+end
+
 Remotes.selectHero():FireServer(heroId())
 refreshLobby()
-hud:showScreen("Lobby")
+Music.play("Lobby")
+hud:showTitle(function()
+	if mode == "Lobby" then
+		hud:showScreen("Lobby")
+	end
+end)

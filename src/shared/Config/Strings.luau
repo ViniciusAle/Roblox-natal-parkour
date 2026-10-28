@@ -1,15 +1,17 @@
 --!strict
--- Textos do jogo. Idioma final em aberto (GDD seção 19): pt-BR é provisório.
--- Nomes dos heróis, vilões e capítulos também podem mudar.
+-- Textos do jogo. Idioma final em aberto: pt-BR é provisório.
+-- Nome do jogo ("Anime Racers") e nomes dos personagens e biomas também são provisórios.
 
 local Strings = {
-	Title = "O Livro de Natal",
+	Title = "Anime Racers",
+	TitleTagline = "Corra. Desvie. Seja lendário.",
+	TapToStart = "TOQUE PARA COMEÇAR",
 	Run = "CORRER",
 	RunAgain = "CORRER DE NOVO",
 	Menu = "Menu",
 	Loading = "Preparando a pista...",
 	StartFailed = "Não deu para começar. Tente de novo.",
-	ChapterBanner = "Capítulo %d · %s",
+	ChapterBanner = "Fase %d · %s",
 	Meters = "%d m",
 	Stumble = "Cuidado!",
 	ShieldBroke = "Escudo quebrou!",
@@ -23,8 +25,8 @@ local Strings = {
 	Ability = "PODER",
 	Solo = "JOGAR SOLO",
 	BackToVillage = "VOLTAR À VILA",
-	HeroLabel = "Herói",
-	ChapterLabel = "Capítulo (solo)",
+	HeroLabel = "Personagem",
+	ChapterLabel = "Fase (solo)",
 	Go = "JÁ!",
 	You = "Você",
 	Spectating = "Assistindo: %s",
@@ -35,14 +37,14 @@ local Strings = {
 	MatchWaiting = "Pise no círculo dourado para correr com amigos  ·  %d/%d",
 	MatchCountdown = "Corrida em %d s  ·  %s",
 	MatchRacing = "Corrida em andamento",
-	BookHint = "Pise no círculo dourado para entrar na corrida!",
+	PortalHint = "Pise no círculo dourado para entrar na corrida!",
 	PadWaiting = "CORRIDA\n%d/%d no círculo",
 	PadCountdown = "LARGADA EM %d s\n%s",
 	PadRacing = "CORRIDA EM ANDAMENTO",
 
 	EndReasons = {
 		Crash = "Bateu!",
-		Caught = "Pego!",
+		Caught = "Tropeçou de novo!",
 		Fall = "Caiu!",
 	} :: { [string]: string },
 
@@ -52,27 +54,35 @@ local Strings = {
 	},
 
 	Heroes = {
-		Elf = "Duende Corredor",
-		Santa = "Papai Noel",
-		Reindeer = "Rena Rudolfo",
-		Snowman = "Boneco de Neve",
-		IceFairy = "Fada do Gelo",
+		Riku = "Riku",
+		Hana = "Hana",
+		Gorou = "Gorou",
+		Ryuga = "Ryuga",
+		Akari = "Akari",
+	} :: { [string]: string },
+
+	Rarities = {
+		Common = "Comum",
+		Rare = "Raro",
+		Epic = "Épico",
+		Legendary = "Lendário",
+		Secret = "Secreto",
 	} :: { [string]: string },
 
 	Chapters = {
-		Gingerbread = "Vila de Pão de Mel",
-		ToyFactory = "Fábrica de Brinquedos",
-		NorthPole = "Polo Norte",
+		NinjaVillage = "Vila Ninja",
+		HarborVillage = "Vila do Porto",
+		AlienPlanet = "Planeta Verde",
 	} :: { [string]: string },
 
 	PowerUps = {
 		Magnet = "Ímã",
 		Shield = "Escudo",
 		DoubleCoins = "Moedas x2",
-		Skates = "Patins",
-		NoseDash = "Dash",
-		SnowballRoll = "Bola de neve",
-		TimeFreeze = "Congelar",
+		Skates = "Turbo",
+		Dash = "Investida",
+		Smash = "Esmagar",
+		TimeSlow = "Câmera lenta",
 	} :: { [string]: string },
 }
 

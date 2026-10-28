@@ -8,7 +8,7 @@ local ChunkGeometry = require(script.Parent.ChunkGeometry)
 local Types = require(script.Parent.Types)
 
 local Track = GameConfig.Track
-local LANES = 3
+local LANES = Track.LaneCount
 local SAMPLE_STEP = 0.5
 
 type Solid = { object: Types.ChunkObject, z0: number, z1: number }
@@ -103,10 +103,10 @@ function ChunkValidator.validate(chunk: Types.ChunkDef): { string }
 	end
 
 	-- Varredura de rota: pistas alcançáveis só passam por pistas sem bloco inteiro
-	local reachable = { true, true, true }
+	local reachable = table.create(LANES, true)
 	local z = 0
 	while z <= Track.ChunkLength do
-		local open = { true, true, true }
+		local open = table.create(LANES, true)
 		for _, solid in solids do
 			if solid.object.kind == "Block" and z >= solid.z0 and z < solid.z1 then
 				open[solid.object.lane :: number] = false

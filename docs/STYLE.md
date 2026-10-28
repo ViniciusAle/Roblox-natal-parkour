@@ -1,75 +1,84 @@
-# Guia de estilo: O Livro de Natal
+# Guia de estilo: Anime Racers
 
-Decidido em 27/10/2026, a partir da proposta do GDD (seção 15). Os dados ficam em
-`src/shared/Config/Themes.luau` (luz, cores, cenário por capítulo) e `src/shared/Config/Props.luau` (receitas das peças).
+Decidido em 28/10/2026, quando o tema mudou de Natal para anime. Os dados ficam em
+`src/shared/Config/Themes.luau` (luz, cores, cenário por fase), `src/shared/Config/Props.luau` (receitas das peças)
+e `src/shared/Config/Rarities.luau` (cores das raridades).
 
 ## Regras gerais
 
-- Formas simples (low-poly), feitas só com peças básicas: bloco, bola, cilindro e cunha.
-- **Perigo x recompensa:** obstáculos têm cores fortes e silhueta clara; moedas são douradas e brilham (Neon); power-ups são esferas neon coloridas que flutuam.
-- **Leitura da pista:** o piso é sempre mais calmo que os obstáculos, e as linhas das pistas ficam visíveis.
-- O cenário lateral nunca entra na pista; os props ficam além das bordas.
-- No celular: no máximo cerca de 3 props por lado por chunk, sem sombras nos props e poucas luzes (PointLight só no lobby).
+- Tudo original: personagens, lugares e símbolos não copiam nenhuma obra. As referências servem para clima, cor e proporção.
+- Formas simples (low-poly) feitas com bloco, bola e cilindro. Telhados e cabelos usam blocos girados (`rot`), não cunhas.
+- **Perigo x recompensa:** obstáculos têm silhueta clara; moedas douradas brilham; power-ups são esferas neon.
+- **Leitura da pista:** 5 pistas com linhas visíveis; o piso é mais calmo que os obstáculos.
+- **Obstáculo alto** sempre mostra algo pendurado até a altura de colisão (cortinas, vela, cipós), para o jogador saber que deve deslizar.
+- No celular: cerca de 3 props por lado por chunk, sem sombras nos props, luz pontual só no lobby.
 
-## Capítulo 1: Vila de pão de mel
+## Personagens (estilo anime de luta, cabeça grande, olhos grandes)
 
-| Elemento | Escolha |
-| --- | --- |
-| Paleta | biscoito (186,112,56), glacê branco, vermelho bala, verde menta, dourado |
-| Piso | biscoito com faixas de glacê a cada 12 studs |
-| Obstáculos | Baixo = par de presentes; Alto = arco de bengala com viga rosa; Bloco = casa de pão de mel |
-| Cenário | casinhas, bengalas, pirulitos, árvores de jujuba; colinas de biscoito ao fundo |
-| Luz | fim de tarde quente (ClockTime 16.6), névoa pêssego, bloom leve |
-| Partículas | neve leve |
+| Raridade | Cor | Personagem | Visual |
+| --- | --- | --- | --- |
+| Comum | cinza | Riku | jaqueta azul, cachecol vermelho, cabelo castanho espetado |
+| Raro | azul | Hana | quimono verde, cabelo rosa curto, espada nas costas |
+| Épico | roxo | Gorou | grandão, regata amarela, moicano roxo, faixas nos braços |
+| Lendário | laranja | Ryuga | armadura escura com dourado, cabelo prateado, manto vermelho |
+| Secreto | rosa | Akari | vestido branco e dourado, cabelo azul-gelo, auréola e asas de luz |
 
-## Capítulo 2: Fábrica de brinquedos (papel recortado)
+De Épico para cima, o personagem tem aura de partículas na cor da raridade.
 
-| Elemento | Escolha |
-| --- | --- |
-| Paleta | vermelho, azul, amarelo e verde de papel, cada um com uma camada mais clara na frente |
-| Piso | esteira azul-acinzentada com ripas a cada 4 studs e linhas amarelas |
-| Obstáculos | Baixo = caixote + caixa de brinquedo; Alto = viga amarela com listras de perigo e luz vermelha embaixo; Bloco = torre de blocos de brinquedo |
-| Cenário | árvores de papel em camadas, engrenagens, blocos, nuvens planas; colinas de papel ao fundo |
-| Luz | dia claro e suave (ClockTime 13), saturação alta, contraste baixo |
-| Partículas | confete de papel colorido |
-
-## Capítulo 3: Polo Norte (noite de luzes, neon equilibrado)
+## Fase 1: Vila Ninja
 
 | Elemento | Escolha |
 | --- | --- |
-| Paleta | azul-gelo, branco neve, ciano neon, com detalhes em vermelho, verde e dourado |
-| Piso | gelo claro (legível no escuro), linhas das pistas em ciano neon |
-| Obstáculos | Baixo = tronco de neve com luzinhas; Alto = viga de gelo com linha neon embaixo; Bloco = bloco de gelo com bordas neon |
-| Cenário | pinheiros com bolas neon, cristais de gelo, iglus com porta acesa, postes; montanhas nevadas ao fundo |
-| Luz | noite (ClockTime 0.5), bloom mais forte, aurora boreal animada no céu |
-| Partículas | neve densa |
-| Neon | só nos detalhes (bordas, enfeites, linhas); o piso e os volumes não brilham |
+| Piso | pedra (Cobblestone) com faixas a cada 10 studs |
+| Obstáculos | Baixo = barris amarrados; Alto = portal torii com cortinas; Bloco = casa japonesa de dois andares |
+| Cenário | casas, cerejeiras, lanternas de pedra, bambuzal; pagode e montanhas ao fundo |
+| Luz | fim de tarde dourado (ClockTime 16.8), névoa rosada |
+| Partículas | pétalas de cerejeira |
 
-## Transição entre capítulos
+## Fase 2: Vila do Porto
 
-Uma página de papel creme com moldura vermelha atravessa a tela, mostrando "Capítulo N · Nome". A luz muda suavemente (1,2 s).
+| Elemento | Escolha |
+| --- | --- |
+| Piso | deque de madeira com ripas a cada 4 studs |
+| Obstáculos | Baixo = caixotes e corda; Alto = vela de barco entre mastros; Bloco = casa de pescador colorida |
+| Cenário | casas turquesa e coral, palmeiras, barcos a remo; farol e ilhas ao fundo |
+| Luz | meio-dia de sol forte, saturação alta |
+| Partículas | maresia leve |
+
+## Fase 3: Planeta Verde
+
+| Elemento | Escolha |
+| --- | --- |
+| Piso | rocha clara com faixas neon verde-água |
+| Obstáculos | Baixo = rochas com cristais; Alto = arco de pedra com cipós brilhantes; Bloco = torre-cogumelo |
+| Cenário | plantas em espiral, cogumelos brilhantes, rochas flutuantes; torres de pedra ao fundo |
+| Luz | céu verde-água, bloom médio; neon só nos detalhes |
+| Partículas | esporos brilhantes |
 
 ## Vila do lobby
 
-Praça nevada ao entardecer, com:
+Vila japonesa ao entardecer, com:
 
-- um livro gigante aberto (a "porta" da corrida);
-- um círculo dourado de fila;
-- uma árvore de Natal gigante com presentes;
-- casas de pão de mel e iglus em volta;
-- postes com cordões de luz coloridos;
-- neve caindo.
+- avenida de pedra com canais de água dos dois lados;
+- portal torii gigante;
+- templo (pagode) com a placa "Anime Racers";
+- círculo dourado de fila;
+- cerejeiras, casas e lanternas de pedra acesas;
+- bambuzal em volta e montanhas ao longe;
+- pétalas caindo.
 
 ## Interface
 
 | Elemento | Escolha |
 | --- | --- |
-| Painéis | papel creme com moldura vermelha e fita vermelha de título com borda dourada |
-| Botões | gradiente verde (ação principal), vermelho (setas, poder) e papel (secundário) |
-| HUD | "pílulas" escuras com borda dourada (🍬 moedas, 📖 distância) |
-| Fontes | FredokaOne (títulos e números), GothamBold (legendas) |
+| Painéis | azul-noite com borda dourada; título num pergaminho ninja (papel, faixa vermelha, rolos de madeira) |
+| Botões | laranja (ação principal e setas), escuro com borda dourada (secundário); crescem ao passar o mouse e encolhem ao tocar |
+| HUD | pílulas escuras com ícones desenhados (moeda dourada, setas de velocidade) |
+| Fontes | Luckiest Guy (títulos e números), Builder Sans Bold (textos), via FontFace |
+| Animações | painéis deslizam ao abrir; contagem e avisos crescem com efeito "Back" |
+| Logo | "ANIME" (branco → ciano) e "RACERS" (dourado → laranja), corte de luz e linhas de velocidade |
 
 ## Ainda provisório
 
-- Heróis e vilões montados com peças; os modelos finais virão do Creator Store ou de arte própria.
-- Logo e tela inicial (pergunta aberta do GDD).
+- Personagens montados com peças, até existirem modelos 3D (`ReplicatedStorage.Assets.Characters`).
+- Nome do jogo, logo final e valores de luz (calibrar por captura de tela).

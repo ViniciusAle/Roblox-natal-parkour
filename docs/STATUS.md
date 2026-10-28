@@ -1,5 +1,62 @@
 # Status do projeto
 
+## Sessão 28/10/2026: mudança de tema para "Anime Racers" (nome provisório)
+
+Decisões do usuário:
+- tema de anime no lugar do Natal;
+- 5 pistas em vez de 3;
+- perseguidores removidos por enquanto;
+- um personagem por raridade (Comum, Raro, Épico, Lendário, Secreto);
+- 3 biomas originais (vila ninja, vila do porto, planeta verde);
+- ícone do menu em forma de pergaminho ninja;
+- logo temporário.
+
+Os personagens pedidos (de Dragon Ball) não foram usados. São de terceiros: usá-los arrisca DMCA e a retirada do jogo, e os modelos deles na Creator Store também não têm licença. No lugar, entraram 5 personagens originais com as mesmas raridades. O jogo aceita modelos 3D próprios em `ReplicatedStorage.Assets.Characters`.
+
+### Feito
+
+- **5 pistas:** `GameConfig.Track.LaneCount`, com largada na pista do meio. Os 19 chunks foram refeitos para 5 pistas e todos passam no validador (conferido por script). A câmera ficou um pouco mais alta e aberta.
+- **Perseguidor desligado** por `GameConfig.Chaser.Enabled = false`; o código fica para voltar depois. O tropeço continua: o segundo tropeço em 10 s encerra a corrida.
+- **Personagens:** Riku (Comum), Hana (Raro), Gorou (Épico), Ryuga (Lendário) e Akari (Secreto), em `Config/Heroes` + `Config/Rarities`.
+  - Montados com peças em estilo anime: cabeça e olhos grandes, cabelo espetado com blocos girados.
+  - Aura de partículas a partir de Épico.
+  - Se existir um `Model` com o id do personagem em `ReplicatedStorage.Assets.Characters`, ele é usado no lugar das peças (escala automática, deita ao deslizar).
+- **Biomas:** Vila Ninja, Vila do Porto e Planeta Verde, cada um com obstáculos, cenário, fundo, luz e partículas próprios (`Config/Themes`, `Config/Props`).
+- **Lobby:**
+  - vila japonesa com templo, placa "Anime Racers", portal torii gigante, canais, cerejeiras, lanternas acesas, bambuzal e pétalas;
+  - o círculo dourado da fila continua.
+- **Sons:**
+  - 11 efeitos da Creator Store e 1 embutido, com volume ajustável;
+  - música em loop na vila e em cada fase, com troca suave (`Music`);
+  - clique nos botões.
+  - Origem e licença de cada um estão em `docs/ASSETS.md`.
+- **Interface:**
+  - fontes por FontFace (Luckiest Guy e Builder Sans);
+  - ícones desenhados no lugar dos emojis;
+  - títulos em pergaminho ninja;
+  - botões que crescem e encolhem ao toque;
+  - painéis que deslizam ao abrir;
+  - raridade colorida no cartão;
+  - tela de logo na entrada (2,5 s, ou toque para pular).
+- **Ferramentas:** o Luau (luau-lang/luau 0.744) foi adicionado ao `rokit.toml`. Todos os arquivos passam no `luau-compile` (checagem de sintaxe).
+
+### Não testado
+
+- Nada desta parte rodou no Studio. Falta conferir:
+  - visual dos personagens e do lobby;
+  - telhados em prisma;
+  - tela de logo;
+  - volume dos sons;
+  - se as músicas tocam (os ids foram escolhidos pelo nome e descrição; ainda não ouvi nenhuma).
+- A checagem de tipos (`--!strict`) só roda no Studio: o analisador fora dele não conhece os tipos do Roblox.
+
+### Em aberto (para o usuário)
+
+- Nome final do jogo e logo definitivo.
+- Ícones em imagem: hoje são desenhados com frames. Para imagens de verdade, é preciso subir as imagens no Roblox e passar os ids.
+- Modelos 3D dos personagens (Blender ou Creator Store com licença).
+- Calibrar a luz das fases por captura de tela.
+
 ## Sessão 27/10/2026 (parte 2): cenários, vila do lobby e corrida multiplayer
 
 Decisões: arte da proposta do GDD, Capítulo 3 com neon equilibrado, lobby em vila 3D com corrida multiplayer.

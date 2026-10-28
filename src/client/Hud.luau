@@ -1,7 +1,7 @@
 --!strict
 -- Interface, celular primeiro: layout por escala, botões grandes, dentro da área segura.
--- Telas: Lobby (vila: escolha de herói e capítulo, fila da corrida), Run (HUD), Results (solo)
--- e RaceResults (ranking da corrida multiplayer). Visual em UiKit.
+-- Telas: Title (logo de entrada), Lobby (vila: personagem, fase, fila da corrida), Run (HUD),
+-- Results (solo) e RaceResults (ranking da corrida multiplayer). Visual em UiKit.
 
 local Players = game:GetService("Players")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -17,8 +17,9 @@ local UiKit = require(script.Parent.UiKit)
 local Ui = GameConfig.Ui
 local C = UiKit.Colors
 local MAX_STANDINGS = 8
+local SPEED_LINES = 14
 
-export type Screen = "Lobby" | "Run" | "Results" | "RaceResults"
+export type Screen = "Title" | "Lobby" | "Run" | "Results" | "RaceResults"
 
 export type Handlers = {
 	solo: () -> (),
@@ -34,7 +35,9 @@ export type StandingRow = { name: string, meters: number, alive: boolean, isYou:
 type HudData = {
 	gui: ScreenGui,
 	screens: { [Screen]: Frame },
+	slides: { [Screen]: { frame: Frame, target: UDim2 } },
 	heroLabel: TextLabel,
+	rarityLabel: TextLabel,
 	chapterLabel: TextLabel,
 	statusLabel: TextLabel,
 	matchBanner: Frame,
@@ -53,6 +56,8 @@ type HudData = {
 	resultLabels: { TextLabel },
 	raceRows: { TextLabel },
 	raceCoins: TextLabel,
+	logo: Frame,
+	tapLabel: TextLabel,
 	cache: { [Instance]: string },
 	flashToken: number,
 }
@@ -75,21 +80,21 @@ local function sizeLimits(parent: Instance, min: Vector2, max: Vector2)
 	constraint.Parent = parent
 end
 
--- Linha "◀ valor ▶"
+-- Linha "< valor >"
 local function selector(parent: Instance, name: string, order: number, onStep: (number) -> ()): TextLabel
-	local row = UiKit.frame(parent, name, UDim2.fromScale(1, 0.15))
+	local row = UiKit.frame(parent, name, UDim2.fromScale(1, 0.14))
 	row.LayoutOrder = order
 
-	local prev = UiKit.button(row, "Prev", UDim2.fromScale(0.18, 1), "<", "Red", function()
+	local prev = UiKit.button(row, "Prev", UDim2.fromScale(0.18, 1), "<", "Orange", function()
 		onStep(-1)
 	end)
 	prev.Position = UDim2.fromScale(0, 0)
 
-	local value = UiKit.text(row, "Value", UDim2.fromScale(0.6, 0.8), "", 30, C.ink)
+	local value = UiKit.text(row, "Value", UDim2.fromScale(0.6, 0.8), "", 30)
 	value.AnchorPoint = Vector2.new(0.5, 0.5)
 	value.Position = UDim2.fromScale(0.5, 0.5)
 
-	local nextButton = UiKit.button(row, "Next", UDim2.fromScale(0.18, 1), ">", "Red", function()
+	local nextButton = UiKit.button(row, "Next", UDim2.fromScale(0.18, 1), ">", "Orange", function()
 		onStep(1)
 	end)
 	nextButton.AnchorPoint = Vector2.new(1, 0)
@@ -97,9 +102,63 @@ local function selector(parent: Instance, name: string, order: number, onStep: (
 	return value
 end
 
-local function caption(parent: Instance, text: string, order: number)
-	local label = UiKit.text(parent, "Caption", UDim2.fromScale(1, 0.08), text, 20, C.ink, UiKit.Fonts.body)
+local function caption(parent: Instance, text: string, order: number): TextLabel
+	local label = UiKit.text(parent, "Caption", UDim2.fromScale(1, 0.07), text, 20, C.mute, UiKit.Fonts.body)
 	label.LayoutOrder = order
+	return label
+end
+
+-- Logo temporário: "ANIME RACERS" com gradiente de energia, linhas de velocidade e um corte de luz
+local function buildTitle(gui: ScreenGui): (Frame, Frame, TextLabel)
+	local title = screenFrame(gui, "Title")
+	title.BackgroundTransparency = 0
+	title.BackgroundColor3 = C.night
+	title.ZIndex = 30
+	UiKit.gradient(title, C.nightLight, Color3.fromRGB(10, 10, 24))
+
+	local random = Random.new(7)
+	for i = 1, SPEED_LINES do
+		local line = UiKit.shape(
+			title,
+			`SpeedLine{i}`,
+			UDim2.fromScale(random:NextNumber(0.2, 0.5), 0.006),
+			UDim2.fromScale(random:NextNumber(0, 1), random:NextNumber(0.05, 0.95)),
+			if i % 3 == 0 then C.orange else C.cyan
+		)
+		line.BackgroundTransparency = random:NextNumber(0.4, 0.8)
+		line.ZIndex = 31
+	end
+
+	local logo = UiKit.frame(title, "Logo", UDim2.fromScale(0.8, 0.5), UDim2.fromScale(0.5, 0.44), Vector2.new(0.5, 0.5))
+	sizeLimits(logo, Vector2.new(280, 140), Vector2.new(900, 420))
+
+	local slash = UiKit.shape(logo, "Slash", UDim2.fromScale(1.1, 0.05), UDim2.fromScale(0.5, 0.55), C.gold)
+	slash.Rotation = -6
+	slash.ZIndex = 32
+	UiKit.gradient(slash, C.orange, C.gold, 0)
+
+	local function word(name: string, text: string, y: number, height: number, from: Color3, to: Color3)
+		local label = UiKit.text(logo, name, UDim2.fromScale(1, height), text, 140, C.white)
+		label.AnchorPoint = Vector2.new(0.5, 0.5)
+		label.Position = UDim2.fromScale(0.5, y)
+		label.Rotation = -4
+		label.ZIndex = 33
+		UiKit.gradient(label, from, to)
+		UiKit.stroke(label, C.night, 5)
+	end
+	word("Anime", "ANIME", 0.3, 0.42, C.white, C.cyan)
+	word("Racers", "RACERS", 0.74, 0.46, C.gold, C.orange)
+
+	local tagline = UiKit.text(title, "Tagline", UDim2.fromScale(0.7, 0.05), Strings.TitleTagline, 28, C.mute, UiKit.Fonts.body)
+	tagline.AnchorPoint = Vector2.new(0.5, 0.5)
+	tagline.Position = UDim2.fromScale(0.5, 0.72)
+	tagline.ZIndex = 33
+
+	local tap = UiKit.text(title, "Tap", UDim2.fromScale(0.6, 0.06), Strings.TapToStart, 34)
+	tap.AnchorPoint = Vector2.new(0.5, 0.5)
+	tap.Position = UDim2.fromScale(0.5, 0.86)
+	tap.ZIndex = 33
+	return title, logo, tap
 end
 
 local function buildLobby(gui: ScreenGui, handlers: Handlers)
@@ -117,39 +176,45 @@ local function buildLobby(gui: ScreenGui, handlers: Handlers)
 	matchLabel.Position = UDim2.fromScale(0.5, 0.5)
 
 	-- Cartão de preparo, à direita (deixa a esquerda livre para o analógico no celular)
-	local card = UiKit.panel(lobby, "Card", UDim2.fromScale(0.27, 0.56), UDim2.fromScale(0.985, 0.5), Vector2.new(1, 0.5))
-	sizeLimits(card, Vector2.new(230, 270), Vector2.new(360, 440))
-	UiKit.ribbon(card, Strings.Title)
+	local cardPosition = UDim2.fromScale(0.985, 0.52)
+	local card = UiKit.panel(lobby, "Card", UDim2.fromScale(0.27, 0.6), cardPosition, Vector2.new(1, 0.5))
+	sizeLimits(card, Vector2.new(230, 290), Vector2.new(360, 470))
+	UiKit.scroll(card, Strings.Title)
 	local body = UiKit.frame(card, "Body", UDim2.fromScale(0.88, 0.82), UDim2.fromScale(0.5, 0.56), Vector2.new(0.5, 0.5))
-	UiKit.list(body, 0.025)
+	UiKit.list(body, 0.02)
 	caption(body, Strings.HeroLabel, 1)
 	local heroLabel = selector(body, "Hero", 2, handlers.cycleHero)
-	caption(body, Strings.ChapterLabel, 3)
-	local chapterLabel = selector(body, "Chapter", 4, handlers.cycleChapter)
-	UiKit.button(body, "Solo", UDim2.fromScale(1, 0.2), Strings.Solo, "Green", handlers.solo).LayoutOrder = 5
-	local statusLabel = UiKit.text(body, "Status", UDim2.fromScale(1, 0.09), "", 18, C.redDark, UiKit.Fonts.body)
-	statusLabel.LayoutOrder = 6
+	local rarityLabel = UiKit.text(body, "Rarity", UDim2.fromScale(1, 0.07), "", 22, C.mute)
+	rarityLabel.LayoutOrder = 3
+	UiKit.stroke(rarityLabel, C.night, 2)
+	caption(body, Strings.ChapterLabel, 4)
+	local chapterLabel = selector(body, "Chapter", 5, handlers.cycleChapter)
+	UiKit.button(body, "Solo", UDim2.fromScale(1, 0.19), Strings.Solo, "Orange", handlers.solo).LayoutOrder = 6
+	local statusLabel = UiKit.text(body, "Status", UDim2.fromScale(1, 0.08), "", 18, C.red, UiKit.Fonts.body)
+	statusLabel.LayoutOrder = 7
 
-	return lobby, heroLabel, chapterLabel, statusLabel, matchBanner, matchLabel
+	return lobby, card, cardPosition, heroLabel, rarityLabel, chapterLabel, statusLabel, matchBanner, matchLabel
 end
 
 function Hud.new(handlers: Handlers): Hud
 	local player = Players.LocalPlayer
 	local gui = Instance.new("ScreenGui")
-	gui.Name = "LivroDeNatalHud"
+	gui.Name = "AnimeRacersHud"
 	gui.ResetOnSpawn = false
 	gui.IgnoreGuiInset = false
 	gui.ScreenInsets = Enum.ScreenInsets.CoreUISafeInsets
 	gui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
 
-	local lobby, heroLabel, chapterLabel, statusLabel, matchBanner, matchLabel = buildLobby(gui, handlers)
+	local title, logo, tapLabel = buildTitle(gui)
+	local lobby, card, cardPosition, heroLabel, rarityLabel, chapterLabel, statusLabel, matchBanner, matchLabel =
+		buildLobby(gui, handlers)
 
 	-- HUD da corrida -------------------------------------------------------------------
 	local run = screenFrame(gui, "Run")
-	local coinsLabel = UiKit.pill(run, "Coins", UDim2.fromScale(0.2, 0.08), UDim2.fromScale(0.015, 0.02), Vector2.zero, "🍬")
+	local coinsLabel = UiKit.pill(run, "Coins", UDim2.fromScale(0.2, 0.08), UDim2.fromScale(0.015, 0.02), Vector2.zero, "Coin")
 	sizeLimits(coinsLabel.Parent :: Frame, Vector2.new(120, 38), Vector2.new(260, 64))
 	local distanceLabel =
-		UiKit.pill(run, "Distance", UDim2.fromScale(0.2, 0.08), UDim2.fromScale(0.985, 0.02), Vector2.new(1, 0), "📖")
+		UiKit.pill(run, "Distance", UDim2.fromScale(0.2, 0.08), UDim2.fromScale(0.985, 0.02), Vector2.new(1, 0), "Speed")
 	sizeLimits(distanceLabel.Parent :: Frame, Vector2.new(120, 38), Vector2.new(260, 64))
 
 	local effectsLabel = UiKit.text(run, "Effects", UDim2.fromScale(0.4, 0.05), "", 24)
@@ -160,11 +225,13 @@ function Hud.new(handlers: Handlers): Hud
 	banner.AnchorPoint = Vector2.new(0.5, 0.5)
 	banner.Position = UDim2.fromScale(0.5, 0.24)
 	banner.Visible = false
+	UiKit.gradient(banner, C.white, C.gold)
 
 	local countdown = UiKit.text(run, "Countdown", UDim2.fromScale(0.5, 0.26), "", 140, C.gold)
 	countdown.AnchorPoint = Vector2.new(0.5, 0.5)
 	countdown.Position = UDim2.fromScale(0.5, 0.42)
-	UiKit.stroke(countdown, C.redDark, 5)
+	UiKit.stroke(countdown, C.night, 6)
+	UiKit.gradient(countdown, C.gold, C.orange)
 	countdown.Visible = false
 
 	local spectating = UiKit.text(run, "Spectating", UDim2.fromScale(0.6, 0.06), "", 30)
@@ -172,7 +239,7 @@ function Hud.new(handlers: Handlers): Hud
 	spectating.Position = UDim2.fromScale(0.5, 0.96)
 	spectating.Visible = false
 
-	local abilityButton = UiKit.button(run, "Ability", UDim2.fromScale(0.15, 0.15), Strings.Ability, "Red", handlers.ability)
+	local abilityButton = UiKit.button(run, "Ability", UDim2.fromScale(0.15, 0.15), Strings.Ability, "Orange", handlers.ability)
 	abilityButton.AnchorPoint = Vector2.new(1, 1)
 	abilityButton.Position = UDim2.fromScale(0.97, 0.95)
 	UiKit.aspect(abilityButton, 1)
@@ -180,7 +247,7 @@ function Hud.new(handlers: Handlers): Hud
 
 	-- Placar ao vivo dos rivais (bom para streamers)
 	local standings = UiKit.frame(run, "Standings", UDim2.fromScale(0.22, 0.34), UDim2.fromScale(0.985, 0.12), Vector2.new(1, 0))
-	standings.BackgroundTransparency = 0.3
+	standings.BackgroundTransparency = 0.25
 	standings.BackgroundColor3 = C.night
 	UiKit.corner(standings, 0.08)
 	UiKit.stroke(standings, C.gold, 2, true)
@@ -198,49 +265,53 @@ function Hud.new(handlers: Handlers): Hud
 
 	-- Fim de corrida solo --------------------------------------------------------------
 	local results = screenFrame(gui, "Results")
-	local resultsPanel = UiKit.panel(results, "Panel", UDim2.fromScale(0.42, 0.66), UDim2.fromScale(0.5, 0.54), Vector2.new(0.5, 0.5))
+	local resultsPosition = UDim2.fromScale(0.5, 0.54)
+	local resultsPanel = UiKit.panel(results, "Panel", UDim2.fromScale(0.42, 0.66), resultsPosition, Vector2.new(0.5, 0.5))
 	sizeLimits(resultsPanel, Vector2.new(280, 300), Vector2.new(520, 480))
-	UiKit.ribbon(resultsPanel, Strings.ResultsTitle)
+	UiKit.scroll(resultsPanel, Strings.ResultsTitle)
 	local resultsBody = UiKit.frame(resultsPanel, "Body", UDim2.fromScale(0.86, 0.82), UDim2.fromScale(0.5, 0.56), Vector2.new(0.5, 0.5))
 	UiKit.list(resultsBody, 0.03)
 	local resultLabels: { TextLabel } = {}
 	for i = 1, 4 do
-		local line = UiKit.text(resultsBody, `Line{i}`, UDim2.fromScale(1, 0.12), "", 32, if i == 1 then C.redDark else C.ink)
+		local line = UiKit.text(resultsBody, `Line{i}`, UDim2.fromScale(1, 0.12), "", 32, if i == 1 then C.gold else C.white)
 		line.LayoutOrder = i
 		resultLabels[i] = line
 	end
-	UiKit.button(resultsBody, "Again", UDim2.fromScale(1, 0.2), Strings.RunAgain, "Green", handlers.again).LayoutOrder = 10
-	UiKit.button(resultsBody, "Village", UDim2.fromScale(0.7, 0.13), Strings.BackToVillage, "Paper", handlers.village).LayoutOrder =
+	UiKit.button(resultsBody, "Again", UDim2.fromScale(1, 0.2), Strings.RunAgain, "Orange", handlers.again).LayoutOrder = 10
+	UiKit.button(resultsBody, "Village", UDim2.fromScale(0.7, 0.13), Strings.BackToVillage, "Dark", handlers.village).LayoutOrder =
 		11
 
 	-- Ranking da corrida ---------------------------------------------------------------
 	local raceResults = screenFrame(gui, "RaceResults")
-	local racePanel = UiKit.panel(raceResults, "Panel", UDim2.fromScale(0.44, 0.78), UDim2.fromScale(0.5, 0.54), Vector2.new(0.5, 0.5))
+	local racePosition = UDim2.fromScale(0.5, 0.54)
+	local racePanel = UiKit.panel(raceResults, "Panel", UDim2.fromScale(0.44, 0.78), racePosition, Vector2.new(0.5, 0.5))
 	sizeLimits(racePanel, Vector2.new(290, 340), Vector2.new(540, 560))
-	UiKit.ribbon(racePanel, Strings.RaceTitle)
+	UiKit.scroll(racePanel, Strings.RaceTitle)
 	local raceBody = UiKit.frame(racePanel, "Body", UDim2.fromScale(0.86, 0.84), UDim2.fromScale(0.5, 0.56), Vector2.new(0.5, 0.5))
 	UiKit.list(raceBody, 0.012)
 	local raceRows: { TextLabel } = {}
 	for i = 1, MAX_STANDINGS do
-		local row = UiKit.text(raceBody, `Place{i}`, UDim2.fromScale(1, 0.07), "", 26, C.ink)
+		local row = UiKit.text(raceBody, `Place{i}`, UDim2.fromScale(1, 0.07), "", 26, C.white)
 		row.LayoutOrder = i
 		raceRows[i] = row
 	end
-	local raceCoins = UiKit.text(raceBody, "Coins", UDim2.fromScale(1, 0.07), "", 24, C.greenDark, UiKit.Fonts.body)
+	local raceCoins = UiKit.text(raceBody, "Coins", UDim2.fromScale(1, 0.07), "", 24, C.gold, UiKit.Fonts.body)
 	raceCoins.LayoutOrder = 20
-	UiKit.button(raceBody, "Village", UDim2.fromScale(1, 0.13), Strings.BackToVillage, "Green", handlers.village).LayoutOrder = 21
-	UiKit.button(raceBody, "Solo", UDim2.fromScale(0.7, 0.1), Strings.Solo, "Paper", handlers.solo).LayoutOrder = 22
+	UiKit.button(raceBody, "Village", UDim2.fromScale(1, 0.13), Strings.BackToVillage, "Orange", handlers.village).LayoutOrder = 21
+	UiKit.button(raceBody, "Solo", UDim2.fromScale(0.7, 0.1), Strings.Solo, "Dark", handlers.solo).LayoutOrder = 22
 
-	-- Página virando entre capítulos -----------------------------------------------------
-	local page = UiKit.frame(gui, "PageTurn", UDim2.fromScale(1.1, 1.3), UDim2.fromScale(1.9, 0.5), Vector2.new(0.5, 0.5))
+	-- Pergaminho que atravessa a tela entre as fases ---------------------------------------
+	local page = UiKit.frame(gui, "PageTurn", UDim2.fromScale(1.1, 0.5), UDim2.fromScale(1.9, 0.5), Vector2.new(0.5, 0.5))
 	page.BackgroundTransparency = 0
-	page.BackgroundColor3 = C.paper
+	page.BackgroundColor3 = C.parchment
 	page.ZIndex = 20
-	UiKit.stroke(page, C.red, 10, true)
-	UiKit.gradient(page, C.paper, C.paperDark)
-	local pageLabel = UiKit.text(page, "Chapter", UDim2.fromScale(0.6, 0.18), "", 64, C.redDark)
+	UiKit.stroke(page, C.woodDark, 8, true)
+	UiKit.gradient(page, C.parchment, C.parchmentDark)
+	local pageBand = UiKit.shape(page, "Band", UDim2.fromScale(1, 0.06), UDim2.fromScale(0.5, 0.82), C.red)
+	pageBand.ZIndex = 21
+	local pageLabel = UiKit.text(page, "Chapter", UDim2.fromScale(0.7, 0.36), "", 72, C.ink)
 	pageLabel.AnchorPoint = Vector2.new(0.5, 0.5)
-	pageLabel.Position = UDim2.fromScale(0.5, 0.5)
+	pageLabel.Position = UDim2.fromScale(0.5, 0.45)
 	pageLabel.ZIndex = 21
 	page.Visible = false
 
@@ -248,8 +319,14 @@ function Hud.new(handlers: Handlers): Hud
 
 	local self: HudData = {
 		gui = gui,
-		screens = { Lobby = lobby, Run = run, Results = results, RaceResults = raceResults },
+		screens = { Title = title, Lobby = lobby, Run = run, Results = results, RaceResults = raceResults },
+		slides = {
+			Lobby = { frame = card, target = cardPosition },
+			Results = { frame = resultsPanel, target = resultsPosition },
+			RaceResults = { frame = racePanel, target = racePosition },
+		},
 		heroLabel = heroLabel,
+		rarityLabel = rarityLabel,
 		chapterLabel = chapterLabel,
 		statusLabel = statusLabel,
 		matchBanner = matchBanner,
@@ -268,6 +345,8 @@ function Hud.new(handlers: Handlers): Hud
 		resultLabels = resultLabels,
 		raceRows = raceRows,
 		raceCoins = raceCoins,
+		logo = logo,
+		tapLabel = tapLabel,
 		cache = {},
 		flashToken = 0,
 	}
@@ -286,6 +365,10 @@ function Hud.showScreen(self: Hud, screen: Screen)
 	for name, frame in self.screens do
 		frame.Visible = name == screen
 	end
+	local slide = self.slides[screen]
+	if slide then
+		UiKit.slideIn(slide.frame, slide.target)
+	end
 	if screen ~= "Run" then
 		self.banner.Visible = false
 		self.countdown.Visible = false
@@ -293,8 +376,52 @@ function Hud.showScreen(self: Hud, screen: Screen)
 	end
 end
 
-function Hud.setSelection(self: Hud, heroName: string, chapterName: string)
+-- Tela de entrada com o logo; chama onDone ao tocar ou depois de alguns segundos
+function Hud.showTitle(self: Hud, onDone: () -> ())
+	local title = self.screens.Title
+	title.Visible = true
+	local logo = self.logo
+	local target = logo.Position
+	logo.Position = target - UDim2.fromScale(0.6, 0)
+	logo.Rotation = -8
+	TweenService:Create(logo, TweenInfo.new(0.6, Enum.EasingStyle.Back, Enum.EasingDirection.Out), { Position = target, Rotation = 0 })
+		:Play()
+	local pulse = TweenService:Create(
+		self.tapLabel,
+		TweenInfo.new(0.7, Enum.EasingStyle.Sine, Enum.EasingDirection.InOut, -1, true),
+		{ TextTransparency = 0.6 }
+	)
+	pulse:Play()
+
+	local finished = false
+	local function finish()
+		if finished then
+			return
+		end
+		finished = true
+		pulse:Cancel()
+		local fade = TweenService:Create(title, TweenInfo.new(Ui.TweenSeconds), { BackgroundTransparency = 1 })
+		fade.Completed:Once(function()
+			title.Visible = false
+			title.BackgroundTransparency = 0
+			onDone()
+		end)
+		self.logo.Visible = false
+		fade:Play()
+	end
+	title.InputBegan:Connect(function(input: InputObject)
+		local kind = input.UserInputType
+		if kind == Enum.UserInputType.MouseButton1 or kind == Enum.UserInputType.Touch then
+			finish()
+		end
+	end)
+	task.delay(Ui.TitleSeconds, finish)
+end
+
+function Hud.setSelection(self: Hud, heroName: string, rarityName: string, rarityColor: Color3, chapterName: string)
 	self:_setText(self.heroLabel, heroName)
+	self:_setText(self.rarityLabel, rarityName)
+	self.rarityLabel.TextColor3 = rarityColor
 	self:_setText(self.chapterLabel, chapterName)
 end
 
@@ -304,7 +431,7 @@ end
 
 function Hud.setMatch(self: Hud, text: string, hot: boolean)
 	self:_setText(self.matchLabel, text)
-	self.matchBanner.BackgroundColor3 = if hot then C.red else C.night
+	self.matchBanner.BackgroundColor3 = if hot then C.orangeDark else C.night
 end
 
 function Hud.setCoins(self: Hud, coins: number)
@@ -319,7 +446,7 @@ function Hud.setEffects(self: Hud, text: string)
 	self:_setText(self.effectsLabel, text)
 end
 
--- cooldown < 0 = herói sem habilidade ativa
+-- cooldown < 0 = personagem sem habilidade ativa
 function Hud.setAbility(self: Hud, cooldown: number)
 	local button = self.abilityButton
 	button.Visible = cooldown >= 0
@@ -365,7 +492,7 @@ function Hud.setStandings(self: Hud, rows: { StandingRow }?)
 		if row then
 			local name = if row.isYou then Strings.You else row.name
 			self:_setText(label, `{i}. {name}  {row.meters} m`)
-			label.TextColor3 = if row.isYou then C.gold elseif row.alive then C.white else Color3.fromRGB(150, 150, 170)
+			label.TextColor3 = if row.isYou then C.gold elseif row.alive then C.white else C.mute
 			label.Visible = true
 		else
 			label.Visible = false
@@ -391,7 +518,7 @@ function Hud.pageTurn(self: Hud, chapterText: string)
 	local page = self.page
 	self.pageLabel.Text = chapterText
 	page.Position = UDim2.fromScale(1.9, 0.5)
-	page.Rotation = 14
+	page.Rotation = 8
 	page.Visible = true
 	local half = Ui.PageTurnSeconds / 2
 	local inTween = TweenService:Create(
@@ -402,7 +529,7 @@ function Hud.pageTurn(self: Hud, chapterText: string)
 	local outTween = TweenService:Create(
 		page,
 		TweenInfo.new(half, Enum.EasingStyle.Quad, Enum.EasingDirection.In),
-		{ Position = UDim2.fromScale(-0.9, 0.5), Rotation = -14 }
+		{ Position = UDim2.fromScale(-0.9, 0.5), Rotation = -8 }
 	)
 	inTween.Completed:Once(function()
 		task.wait(0.25)
@@ -429,7 +556,7 @@ function Hud.showRaceResults(self: Hud, results: Types.RaceResults, myUserId: nu
 		if standing then
 			local name = if standing.userId == myUserId then Strings.You else standing.name
 			label.Text = string.format(Strings.RacePlace, standing.place, name, standing.meters)
-			label.TextColor3 = if standing.userId == myUserId then C.red elseif i == 1 then C.goldDark else C.ink
+			label.TextColor3 = if standing.userId == myUserId then C.orange elseif i == 1 then C.gold else C.white
 			label.Visible = true
 		else
 			label.Visible = false

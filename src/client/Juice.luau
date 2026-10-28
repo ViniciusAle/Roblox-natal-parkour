@@ -1,6 +1,6 @@
 --!strict
 -- Sons de resposta imediata. Moedas seguidas sobem de tom; errar a sequência reinicia.
--- Sons sem id (Config/Sounds) ficam mudos até a origem do áudio ser decidida.
+-- Sons sem id em Config/Sounds ficam mudos.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Shared = ReplicatedStorage.Shared
@@ -27,11 +27,12 @@ function Juice.new(parent: Instance): Juice
 	folder.Parent = parent
 
 	local sounds: { [string]: Sound } = {}
-	for name, id in SoundIds do
+	for name, id in SoundIds.Effects do
 		if id ~= "" then
 			local sound = Instance.new("Sound")
 			sound.Name = name
 			sound.SoundId = id
+			sound.Volume = SoundIds.Volumes[name] or 1
 			sound.Parent = folder
 			sounds[name] = sound
 		end

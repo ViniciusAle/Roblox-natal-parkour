@@ -43,13 +43,13 @@ local MagnetPerLevel = { duration = 1.5, radius = 2 }
 
 -- Consumíveis fortes (entram junto com a loja)
 local Consumables = {
-	SnowPortal = { distanceMeters = 150, graceSeconds = 2 },
+	WarpScroll = { distanceMeters = 150, graceSeconds = 2 },
 }
 
 local HeroActives: { [string]: HeroActiveDef } = {
-	NoseDash = { cooldown = 30, effect = { duration = 2, speedMultiplier = 1.5, invulnerable = true } },
-	SnowballRoll = { cooldown = 30, effect = { duration = 3, crushKinds = { Low = true } } },
-	TimeFreeze = { cooldown = 35, effect = { duration = 2.5, timeScale = 0.6 } },
+	Dash = { cooldown = 30, effect = { duration = 2, speedMultiplier = 1.5, invulnerable = true } },
+	Smash = { cooldown = 30, effect = { duration = 3, crushKinds = { Low = true } } },
+	TimeSlow = { cooldown = 35, effect = { duration = 2.5, timeScale = 0.6 } },
 }
 
 -- Maior multiplicador de moedas possível ao mesmo tempo (usado na validação do servidor)

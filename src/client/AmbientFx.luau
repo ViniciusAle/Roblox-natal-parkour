@@ -1,5 +1,5 @@
 --!strict
--- Efeitos que acompanham a câmera: neve ou confete de papel, aurora boreal (Capítulo 3)
+-- Efeitos que acompanham a câmera: pétalas, maresia ou esporos (por fase), aurora opcional
 -- e linhas de vento que aparecem com a velocidade. Leves, pensando no celular.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

@@ -1,5 +1,6 @@
 --!strict
--- Uma corrida no cliente: junta corredor, pista, colisão, coleta, efeitos, vilão, câmera e HUD.
+-- Uma corrida no cliente: junta corredor, pista, colisão, coleta, efeitos, câmera e HUD
+-- (e o vilão perseguidor, quando GameConfig.Chaser.Enabled).
 -- O cliente simula para responder na hora; o resultado vai para o servidor validar.
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -22,6 +23,7 @@ local GhostManager = require(script.Parent.GhostManager)
 local Hud = require(script.Parent.Hud)
 local Input = require(script.Parent.Input)
 local Juice = require(script.Parent.Juice)
+local Music = require(script.Parent.Music)
 local Runner = require(script.Parent.Runner)
 local RunnerView = require(script.Parent.RunnerView)
 local Track = require(script.Parent.Track)
@@ -51,7 +53,7 @@ type SessionData = {
 	track: Track.Track,
 	runner: Runner.Runner,
 	runnerView: RunnerView.RunnerView,
-	chaser: ChaserView.ChaserView,
+	chaser: ChaserView.ChaserView?, -- nil = perseguidor desligado
 	camera: CameraRig.CameraRig,
 	juice: Juice.Juice,
 	ambient: AmbientFx.AmbientFx,
@@ -87,7 +89,7 @@ function RunSession.new(
 	onEnded: (Types.RunReport, EndReason) -> (),
 	options: Options
 ): RunSession
-	local hero = Heroes.ById[loadout.heroId] or Heroes.ById.Elf
+	local hero = Heroes.ById[loadout.heroId] or Heroes.ById[Heroes.Order[1]]
 	local passive = hero.passive
 
 	local folder = Instance.new("Folder")
@@ -106,7 +108,7 @@ function RunSession.new(
 	self.generator = generator
 	self.track = track
 	self.runnerView = RunnerView.new(folder, hero.id)
-	self.chaser = ChaserView.new(folder)
+	self.chaser = if GameConfig.Chaser.Enabled then ChaserView.new(folder) else nil
 	self.camera = CameraRig.new()
 	self.juice = Juice.new(folder)
 	self.ambient = AmbientFx.new(folder)
@@ -142,7 +144,8 @@ function RunSession.new(
 	track:update(0)
 	ChapterAmbience.apply(loadout.chapterId, true)
 	self.ambient:setChapter(loadout.chapterId)
-	self.chaser:setVillain(Chapters.ById[loadout.chapterId].chaserId)
+	Music.play(loadout.chapterId)
+	session:_setChaser(loadout.chapterId)
 	hud:setCoins(0)
 	hud:setDistance(0)
 	hud:setEffects("")
@@ -451,7 +454,15 @@ function RunSession._checkChapter(self: RunSession)
 		self.juice:play("PageTurn")
 		ChapterAmbience.apply(slot.chapterId)
 		self.ambient:setChapter(slot.chapterId)
-		self.chaser:setVillain(Chapters.ById[slot.chapterId].chaserId)
+		Music.play(slot.chapterId)
+		self:_setChaser(slot.chapterId)
+	end
+end
+
+function RunSession._setChaser(self: RunSession, chapterId: string)
+	local chaserId = Chapters.ById[chapterId].chaserId
+	if self.chaser and chaserId then
+		self.chaser:setVillain(chaserId)
 	end
 end
 
@@ -588,7 +599,9 @@ function RunSession._render(self: RunSession, dt: number)
 		gliding = runner.gliding,
 		time = self.time,
 	}, self.shield, self.time < self.graceUntil)
-	self.chaser:update(dt, runner.x, runner.distance - self.chaserGap, self.time)
+	if self.chaser then
+		self.chaser:update(dt, runner.x, runner.distance - self.chaserGap, self.time)
+	end
 
 	local focus = Vector3.new(runner.x, runner.y, runner.distance)
 	local speed = runner.speed
@@ -610,7 +623,9 @@ function RunSession.destroy(self: RunSession)
 	self.camera:destroy()
 	self.track:destroy()
 	self.runnerView:destroy()
-	self.chaser:destroy()
+	if self.chaser then
+		self.chaser:destroy()
+	end
 	self.juice:destroy()
 	self.ambient:destroy()
 	if self.ghosts then

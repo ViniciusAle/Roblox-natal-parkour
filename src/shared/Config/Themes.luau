@@ -1,9 +1,9 @@
 --!strict
--- Visual de cada capítulo (direção de arte decidida em 27/10/2026, ver docs/STYLE.md):
---   1. Vila de pão de mel  : biscoito, glacê, doces, luz quente de fim de tarde
---   2. Fábrica de brinquedos: papel recortado, camadas planas, cores chapadas, luz clara e suave
---   3. Polo Norte           : noite de luzes, neon EQUILIBRADO (luz nos detalhes, piso legível)
--- Os capítulos dividem as mesmas formas; muda paleta, material, luz e efeitos.
+-- Visual de cada fase do Anime Racers (biomas originais, decididos em 28/10/2026; ver docs/STYLE.md):
+--   1. Vila Ninja    : madeira, telhados em camadas, cerejeiras, lanternas; fim de tarde dourado
+--   2. Vila do Porto : cais, casas coloridas, palmeiras, velas; meio-dia de sol forte
+--   3. Planeta Verde : rochas, cristais, cogumelos gigantes; céu verde-água, brilho só nos detalhes
+-- Valores de luz escolhidos sem ver o jogo: calibrar por captura de tela.
 
 export type PropEntry = {
 	recipe: string,
@@ -43,126 +43,127 @@ local function rgb(r: number, g: number, b: number): Color3
 end
 
 local Themes: { [string]: Theme } = {
-	Gingerbread = {
-		floor = { color = rgb(214, 150, 88), material = Enum.Material.SmoothPlastic, stripe = rgb(250, 245, 235), stripeEvery = 12 },
-		laneLine = { color = rgb(250, 245, 235), material = Enum.Material.SmoothPlastic },
-		rail = { color = rgb(250, 245, 235), trim = rgb(214, 40, 52), trimMaterial = Enum.Material.SmoothPlastic },
-		ground = { color = rgb(250, 236, 236), material = Enum.Material.Snow },
-		obstacles = { Low = "GiftPair", High = "CandyArch", Block = "GingerHouse" },
-		trampoline = rgb(90, 220, 130),
+	NinjaVillage = {
+		floor = { color = rgb(168, 160, 150), material = Enum.Material.Cobblestone, stripe = rgb(120, 112, 104), stripeEvery = 10 },
+		laneLine = { color = rgb(235, 225, 205), material = Enum.Material.SmoothPlastic },
+		rail = { color = rgb(120, 78, 45), trim = rgb(206, 52, 40), trimMaterial = Enum.Material.SmoothPlastic },
+		ground = { color = rgb(118, 160, 90), material = Enum.Material.Grass },
+		obstacles = { Low = "WoodBarrels", High = "ToriiBeam", Block = "JapaneseHouse" },
+		trampoline = rgb(255, 120, 170),
 		propsPerSide = 3,
 		props = {
-			{ recipe = "GingerHouse", size = Vector3.new(14, 14, 12), weight = 3, offset = NumberRange.new(10, 30) },
-			{ recipe = "CandyCane", size = Vector3.new(2, 10, 2), weight = 3, offset = NumberRange.new(3, 8) },
-			{ recipe = "Lollipop", size = Vector3.new(6, 10, 6), weight = 2, offset = NumberRange.new(6, 20) },
-			{ recipe = "GumdropTree", size = Vector3.new(8, 12, 8), weight = 3, offset = NumberRange.new(8, 34) },
+			{ recipe = "JapaneseHouse", size = Vector3.new(16, 16, 14), weight = 3, offset = NumberRange.new(10, 32) },
+			{ recipe = "SakuraTree", size = Vector3.new(10, 14, 10), weight = 4, offset = NumberRange.new(4, 30) },
+			{ recipe = "StoneLantern", size = Vector3.new(2.6, 5, 2.6), weight = 2, offset = NumberRange.new(2, 5) },
+			{ recipe = "Bamboo", size = Vector3.new(6, 18, 6), weight = 2, offset = NumberRange.new(6, 36) },
 		},
 		backdrop = {
-			{ recipe = "CookieHill", size = Vector3.new(60, 24, 60), weight = 1, offset = NumberRange.new(70, 110) },
+			{ recipe = "Pagoda", size = Vector3.new(26, 60, 26), weight = 1, offset = NumberRange.new(55, 85) },
+			{ recipe = "MistyMountain", size = Vector3.new(90, 50, 90), weight = 2, offset = NumberRange.new(90, 140) },
 		},
 		lighting = {
-			clockTime = 16.6,
+			clockTime = 16.8,
 			brightness = 2.4,
-			ambient = rgb(120, 90, 80),
-			outdoorAmbient = rgb(170, 140, 130),
-			fogColor = rgb(255, 214, 190),
+			ambient = rgb(120, 100, 100),
+			outdoorAmbient = rgb(175, 150, 145),
+			fogColor = rgb(255, 214, 200),
 			fogEnd = 650,
 			atmosphere = {
-				density = 0.32,
+				density = 0.3,
 				offset = 0.1,
-				color = rgb(255, 214, 190),
-				decay = rgb(240, 150, 120),
+				color = rgb(255, 210, 200),
+				decay = rgb(235, 140, 130),
 				glare = 0.4,
-				haze = 1.4,
+				haze = 1.3,
 			},
-			bloom = { intensity = 0.5, size = 24, threshold = 1.7 },
-			grading = { tint = rgb(255, 244, 232), saturation = 0.15, contrast = 0.06, brightness = 0.02 },
+			bloom = { intensity = 0.45, size = 24, threshold = 1.7 },
+			grading = { tint = rgb(255, 242, 236), saturation = 0.18, contrast = 0.06, brightness = 0.02 },
 		},
-		particles = { rate = 18, colors = { rgb(255, 255, 255) }, size = 0.35, speed = 6 },
+		-- Pétalas de cerejeira
+		particles = { rate = 16, colors = { rgb(255, 190, 215), rgb(255, 150, 190) }, size = 0.35, speed = 3 },
 		aurora = false,
 	},
 
-	ToyFactory = {
-		floor = { color = rgb(72, 86, 120), material = Enum.Material.SmoothPlastic, stripe = rgb(56, 66, 96), stripeEvery = 4 },
-		laneLine = { color = rgb(250, 200, 70), material = Enum.Material.SmoothPlastic },
-		rail = { color = rgb(250, 200, 70), trim = rgb(35, 32, 38), trimMaterial = Enum.Material.SmoothPlastic },
-		ground = { color = rgb(244, 232, 210), material = Enum.Material.SmoothPlastic },
-		obstacles = { Low = "ToyCrate", High = "ConveyorBeam", Block = "ToyTower" },
-		trampoline = rgb(90, 220, 140),
+	HarborVillage = {
+		floor = { color = rgb(186, 140, 92), material = Enum.Material.WoodPlanks, stripe = rgb(140, 100, 64), stripeEvery = 4 },
+		laneLine = { color = rgb(250, 245, 230), material = Enum.Material.SmoothPlastic },
+		rail = { color = rgb(250, 247, 238), trim = rgb(60, 110, 190), trimMaterial = Enum.Material.SmoothPlastic },
+		ground = { color = rgb(238, 214, 160), material = Enum.Material.Sand },
+		obstacles = { Low = "CargoCrates", High = "SailBeam", Block = "FisherHouse" },
+		trampoline = rgb(90, 220, 200),
 		propsPerSide = 3,
 		props = {
-			{ recipe = "PaperTree", size = Vector3.new(8, 14, 2), weight = 3, offset = NumberRange.new(5, 26) },
-			{ recipe = "Gear", size = Vector3.new(10, 10, 2), weight = 2, offset = NumberRange.new(8, 30), elevation = 2 },
-			{ recipe = "ToyBlocks", size = Vector3.new(8, 6, 8), weight = 2, offset = NumberRange.new(4, 18) },
-			{ recipe = "PaperCloud", size = Vector3.new(16, 6, 2), weight = 2, offset = NumberRange.new(10, 40), elevation = 24 },
+			{ recipe = "FisherHouseTeal", size = Vector3.new(14, 14, 14), weight = 2, offset = NumberRange.new(10, 30) },
+			{ recipe = "FisherHouseCoral", size = Vector3.new(14, 14, 14), weight = 2, offset = NumberRange.new(10, 30) },
+			{ recipe = "PalmTree", size = Vector3.new(10, 18, 10), weight = 4, offset = NumberRange.new(4, 34) },
+			{ recipe = "CargoCrates", size = Vector3.new(7, 3, 3), weight = 2, offset = NumberRange.new(2, 8) },
+			{ recipe = "Rowboat", size = Vector3.new(4, 3, 9), weight = 1, offset = NumberRange.new(8, 24) },
 		},
 		backdrop = {
-			{ recipe = "PaperHills", size = Vector3.new(80, 30, 4), weight = 1, offset = NumberRange.new(60, 100) },
+			{ recipe = "Lighthouse", size = Vector3.new(10, 44, 10), weight = 1, offset = NumberRange.new(45, 70) },
+			{ recipe = "IslandHill", size = Vector3.new(70, 26, 70), weight = 2, offset = NumberRange.new(80, 130) },
 		},
 		lighting = {
-			clockTime = 13,
-			brightness = 2.8,
-			ambient = rgb(150, 150, 165),
-			outdoorAmbient = rgb(190, 190, 205),
-			fogColor = rgb(225, 232, 245),
-			fogEnd = 600,
+			clockTime = 12.5,
+			brightness = 3,
+			ambient = rgb(140, 150, 165),
+			outdoorAmbient = rgb(185, 195, 210),
+			fogColor = rgb(200, 230, 250),
+			fogEnd = 700,
 			atmosphere = {
-				density = 0.25,
+				density = 0.22,
 				offset = 0.05,
-				color = rgb(225, 232, 245),
-				decay = rgb(190, 200, 230),
-				glare = 0,
+				color = rgb(200, 230, 250),
+				decay = rgb(150, 200, 240),
+				glare = 0.2,
 				haze = 0.8,
 			},
-			bloom = { intensity = 0.25, size = 18, threshold = 2 },
-			grading = { tint = rgb(255, 252, 245), saturation = 0.25, contrast = -0.05, brightness = 0.04 },
+			bloom = { intensity = 0.3, size = 20, threshold = 2 },
+			grading = { tint = rgb(255, 252, 245), saturation = 0.28, contrast = 0.04, brightness = 0.03 },
 		},
-		particles = {
-			rate = 10,
-			colors = { rgb(232, 86, 80), rgb(70, 130, 220), rgb(250, 200, 70), rgb(90, 175, 110) },
-			size = 0.3,
-			speed = 4,
-		},
+		-- Brilho leve de maresia
+		particles = { rate = 6, colors = { rgb(255, 255, 255) }, size = 0.2, speed = 2 },
 		aurora = false,
 	},
 
-	NorthPole = {
-		floor = { color = rgb(180, 215, 240), material = Enum.Material.Ice },
-		laneLine = { color = rgb(90, 235, 255), material = Enum.Material.Neon },
-		rail = { color = rgb(235, 245, 255), trim = rgb(90, 235, 255), trimMaterial = Enum.Material.Neon },
-		ground = { color = rgb(225, 238, 252), material = Enum.Material.Snow },
-		obstacles = { Low = "SnowLog", High = "IcicleBeam", Block = "IceBlock" },
-		trampoline = rgb(110, 240, 200),
+	AlienPlanet = {
+		floor = { color = rgb(150, 160, 175), material = Enum.Material.Slate, stripe = rgb(110, 255, 200), stripeEvery = 12 },
+		laneLine = { color = rgb(120, 255, 220), material = Enum.Material.Neon },
+		rail = { color = rgb(70, 100, 96), trim = rgb(120, 255, 220), trimMaterial = Enum.Material.Neon },
+		ground = { color = rgb(80, 190, 150), material = Enum.Material.Grass },
+		obstacles = { Low = "CrystalRocks", High = "VineArch", Block = "MushroomTower" },
+		trampoline = rgb(230, 255, 120),
 		propsPerSide = 3,
 		props = {
-			{ recipe = "PineLights", size = Vector3.new(8, 16, 8), weight = 4, offset = NumberRange.new(6, 32) },
-			{ recipe = "IceCrystal", size = Vector3.new(6, 12, 6), weight = 2, offset = NumberRange.new(4, 20) },
-			{ recipe = "Igloo", size = Vector3.new(12, 8, 12), weight = 1, offset = NumberRange.new(14, 34) },
-			{ recipe = "StarLamp", size = Vector3.new(2, 12, 2), weight = 2, offset = NumberRange.new(3, 6) },
+			{ recipe = "SpiralPlant", size = Vector3.new(8, 16, 8), weight = 3, offset = NumberRange.new(4, 30) },
+			{ recipe = "GlowShrooms", size = Vector3.new(6, 6, 6), weight = 3, offset = NumberRange.new(2, 14) },
+			{ recipe = "MushroomTower", size = Vector3.new(14, 18, 14), weight = 2, offset = NumberRange.new(12, 34) },
+			{ recipe = "FloatingRock", size = Vector3.new(10, 8, 10), weight = 1, offset = NumberRange.new(10, 40), elevation = 18 },
 		},
 		backdrop = {
-			{ recipe = "SnowMountain", size = Vector3.new(90, 50, 90), weight = 1, offset = NumberRange.new(80, 130) },
+			{ recipe = "AlienSpire", size = Vector3.new(36, 70, 36), weight = 2, offset = NumberRange.new(60, 110) },
 		},
 		lighting = {
-			clockTime = 0.5,
-			brightness = 1.2,
-			ambient = rgb(70, 80, 130),
-			outdoorAmbient = rgb(90, 105, 160),
-			fogColor = rgb(25, 35, 75),
-			fogEnd = 520,
+			clockTime = 14,
+			brightness = 2.2,
+			ambient = rgb(90, 130, 120),
+			outdoorAmbient = rgb(130, 180, 165),
+			fogColor = rgb(150, 230, 200),
+			fogEnd = 600,
 			atmosphere = {
-				density = 0.35,
-				offset = 0.15,
-				color = rgb(40, 55, 110),
-				decay = rgb(20, 30, 70),
-				glare = 0,
-				haze = 1.2,
+				density = 0.34,
+				offset = 0.12,
+				color = rgb(150, 240, 200),
+				decay = rgb(90, 190, 170),
+				glare = 0.1,
+				haze = 1.4,
 			},
-			bloom = { intensity = 0.9, size = 28, threshold = 1.2 },
-			grading = { tint = rgb(225, 235, 255), saturation = 0.1, contrast = 0.08, brightness = 0.03 },
+			bloom = { intensity = 0.6, size = 26, threshold = 1.4 },
+			grading = { tint = rgb(235, 255, 245), saturation = 0.2, contrast = 0.08, brightness = 0.02 },
 		},
-		particles = { rate = 40, colors = { rgb(255, 255, 255) }, size = 0.4, speed = 5 },
-		aurora = true,
+		-- Esporos brilhantes flutuando
+		particles = { rate = 14, colors = { rgb(230, 255, 120), rgb(120, 255, 220) }, size = 0.3, speed = 1.5 },
+		aurora = false,
 	},
 }
 

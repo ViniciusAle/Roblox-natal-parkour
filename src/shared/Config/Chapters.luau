@@ -1,43 +1,26 @@
 --!strict
--- Capítulos (ambientes) do Livro de Natal: regras de jogo. O visual de cada um fica em Config/Themes.
--- Capítulo novo = linha aqui + tema em Themes + nome em Strings.
+-- Capítulos (biomas) do Anime Racers: regras de jogo. O visual de cada um fica em Config/Themes.
+-- Capítulo novo = linha aqui + tema em Themes + nome em Strings + música em Sounds.Music.
+-- Os biomas são originais (inspirados no clima de animes, sem copiar lugares de nenhuma obra).
 
 export type ChapterDef = {
 	id: string,
-	chaserId: string,
+	chaserId: string?, -- perseguidor desligado por enquanto (GameConfig.Chaser.Enabled)
 	bossId: string?, -- chefes entram numa fase posterior
 	freeByDefault: boolean,
-	price: number?, -- a definir (GDD seção 19)
-	musicId: string, -- a definir: origem e licença do áudio em aberto
+	price: number?, -- a definir
 }
 
 local ById: { [string]: ChapterDef } = {
-	Gingerbread = {
-		id = "Gingerbread",
-		chaserId = "Krampus",
-		bossId = "GrumpyGreen",
-		freeByDefault = true,
-		musicId = "",
-	},
-	ToyFactory = {
-		id = "ToyFactory",
-		chaserId = "RebelElf",
-		freeByDefault = true,
-		musicId = "",
-	},
-	NorthPole = {
-		id = "NorthPole",
-		chaserId = "Krampus",
-		bossId = "IceKing",
-		freeByDefault = true,
-		musicId = "",
-	},
+	NinjaVillage = { id = "NinjaVillage", freeByDefault = true },
+	HarborVillage = { id = "HarborVillage", freeByDefault = true },
+	AlienPlanet = { id = "AlienPlanet", freeByDefault = true },
 }
 
 local Chapters = {
 	ById = ById,
-	-- Ordem das páginas do livro: a corrida avança por esta lista em ciclo
-	Order = { "Gingerbread", "ToyFactory", "NorthPole" },
+	-- Ordem dos biomas: a corrida avança por esta lista em ciclo
+	Order = { "NinjaVillage", "HarborVillage", "AlienPlanet" },
 }
 
 function Chapters.indexOf(id: string): number?

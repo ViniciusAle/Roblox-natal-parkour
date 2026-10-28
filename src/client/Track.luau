@@ -21,7 +21,8 @@ local TrackConfig = GameConfig.Track
 local Obstacles = GameConfig.Obstacles
 local Scenery = GameConfig.Scenery
 local CHUNK = TrackConfig.ChunkLength
-local TRACK_WIDTH = TrackConfig.LaneWidth * 3
+local LANES = TrackConfig.LaneCount
+local TRACK_WIDTH = TrackConfig.LaneWidth * LANES
 local EDGE = TRACK_WIDTH / 2 + TrackConfig.RailWidth
 local SMOOTH = Enum.Material.SmoothPlastic
 
@@ -177,12 +178,13 @@ function Track._floor(self: Track, built: BuiltChunk, from: number, to: number, 
 		theme.floor.material
 	)
 
-	for _, side in { -1, 1 } do
+	-- Linhas entre as pistas
+	for boundary = 1, LANES - 1 do
 		self:_place(
 			built,
 			self.pools.flat,
 			Vector3.new(Scenery.LaneLineWidth, 0.06, length),
-			Vector3.new(side * TrackConfig.LaneWidth / 2, 0.03, mid),
+			Vector3.new(TrackSpace.laneX(boundary + 0.5), 0.03, mid),
 			theme.laneLine.color,
 			theme.laneLine.material
 		)
@@ -326,7 +328,7 @@ function Track._build(self: Track, index: number): BuiltChunk
 		local z0, z1 = ChunkGeometry.extent(object)
 		z0 += start
 		z1 += start
-		local lane = object.lane or 2
+		local lane = object.lane or TrackSpace.CenterLane
 		local x = TrackSpace.laneX(lane)
 
 		if kind == "Low" or kind == "High" or kind == "Block" then

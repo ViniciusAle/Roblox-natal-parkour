@@ -1,5 +1,5 @@
 --!strict
--- Iluminação local por capítulo (só no cliente): céu, névoa, atmosfera, bloom e correção de cor.
+-- Iluminação local por fase (só no cliente): céu, névoa, atmosfera, bloom e correção de cor.
 -- Os efeitos do lobby são guardados ao entrar na corrida e devolvidos ao sair.
 
 local Lighting = game:GetService("Lighting")
@@ -8,7 +8,7 @@ local TweenService = game:GetService("TweenService")
 local Themes = require(ReplicatedStorage.Shared.Config.Themes)
 
 local BLEND = TweenInfo.new(1.2, Enum.EasingStyle.Sine)
-local FX_NAME = "LivroDeNatalFx"
+local FX_NAME = "AnimeRacersFx"
 
 type Snapshot = {
 	clockTime: number,

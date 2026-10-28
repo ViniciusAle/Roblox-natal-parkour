@@ -9,7 +9,7 @@ local SpeedCurve = require(Shared.SpeedCurve)
 local TrackSpace = require(script.Parent.TrackSpace)
 
 local Jump = GameConfig.Jump
-local LANE_COUNT = 3
+local LANE_COUNT = GameConfig.Track.LaneCount
 
 export type MoveAction = "Left" | "Right" | "Jump" | "Slide"
 export type RunnerEvent = "Jump" | "DoubleJump" | "Launch" | "Land" | "LaneChange" | "LaneBlocked" | "Slide"
@@ -67,8 +67,8 @@ function Runner.new(modifiers: Modifiers, onEvent: (RunnerEvent, number) -> ()):
 		distance = 0,
 		speed = GameConfig.Speed.Start,
 		speedScale = 1,
-		lane = 2,
-		laneFrom = 2,
+		lane = TrackSpace.CenterLane,
+		laneFrom = TrackSpace.CenterLane,
 		laneAlpha = 1,
 		x = 0,
 		y = 0,

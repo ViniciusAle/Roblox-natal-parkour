@@ -7,7 +7,7 @@ export type ObjectKind = "Low" | "High" | "Block" | "Gap" | "Coins" | "PowerUp" 
 export type ChunkObject = {
 	kind: ObjectKind,
 	z: number,
-	lane: number?, -- 1 a 3; Gap ocupa as 3 pistas
+	lane: number?, -- 1 a GameConfig.Track.LaneCount (5); Gap ocupa todas as pistas
 	length: number?, -- Block e Gap
 	count: number?, -- Coins
 	spacing: number?, -- Coins

@@ -4,6 +4,7 @@
 local GameConfig = {
 	Track = {
 		Origin = Vector3.new(6000, 600, 0), -- a pista é local do cliente, longe da vila do lobby
+		LaneCount = 5, -- pistas lado a lado; a do meio é a de largada
 		LaneWidth = 8,
 		ChunkLength = 60,
 		ChunksAhead = 6,
@@ -78,7 +79,9 @@ local GameConfig = {
 		RecoverSeconds = 1.5,
 	},
 
+	-- Perseguidor desligado por enquanto (decisão de 28/10/2026); o código fica para voltar depois
 	Chaser = {
+		Enabled = false,
 		FarGap = 45,
 		NearGap = 8,
 		CaughtGap = 1.5,
@@ -111,13 +114,13 @@ local GameConfig = {
 	DifficultyWeights = { 3, 2, 1, 1, 1 },
 
 	Camera = {
-		Offset = Vector3.new(0, 9, 18),
+		Offset = Vector3.new(0, 10.5, 20), -- mais alta e afastada para enxergar as 5 pistas
 		LookAhead = 14,
 		LookHeight = 2,
 		FollowX = 10,
 		FollowY = 6,
-		BaseFov = 70,
-		MaxFov = 84,
+		BaseFov = 72,
+		MaxFov = 86,
 		ShakeDecay = 3,
 		LandShake = 0.2,
 		HitShake = 0.9,
@@ -155,21 +158,24 @@ local GameConfig = {
 		SpeedLinesMaxRate = 60,
 	},
 
-	-- Vila do lobby (montada pelo servidor)
+	-- Vila do lobby (montada pelo servidor): vila japonesa com cerejeiras
 	Lobby = {
 		Center = Vector3.new(0, 0, 0),
 		GroundSize = 700,
 		PlazaRadius = 70,
 		SpawnOffset = Vector3.new(0, 3, 45),
-		BookOffset = Vector3.new(0, 0, -45),
+		TempleOffset = Vector3.new(0, 0, -62),
 		PadOffset = Vector3.new(0, 0, -22),
 		PadRadius = 11,
-		HouseRing = 95,
-		HouseCount = 9,
-		TreeRing = 130,
-		TreeCount = 16,
-		LampRing = 60,
-		LampCount = 10,
+		HouseRing = 98,
+		HouseCount = 8,
+		TreeRing = 82,
+		TreeCount = 10,
+		LanternRing = 58,
+		LanternCount = 10,
+		ForestRing = 150,
+		ForestCount = 18,
+		CanalOffset = 30, -- canal de água dos dois lados da avenida
 	},
 
 	-- Corrida multiplayer (GDD seção 10). Mínimo de jogadores e regras de vitória: em aberto.
@@ -203,6 +209,10 @@ local GameConfig = {
 	},
 
 	Ui = {
+		TitleSeconds = 2.5, -- logo na entrada, antes da vila (toque pula)
+		TweenSeconds = 0.25,
+		PressScale = 0.92,
+		HoverScale = 1.05,
 		ResultsDelay = 1.2,
 		ResultsTimeout = 8, -- sem resposta do servidor, volta ao menu
 		FlashSeconds = 1.2,

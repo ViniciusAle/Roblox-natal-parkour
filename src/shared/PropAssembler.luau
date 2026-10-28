@@ -11,6 +11,7 @@ export type PartSpec = {
 	size: Vector3, -- tamanho no mundo, em fração da caixa
 	axis: ("Y" | "Z")?, -- cilindro: eixo vertical (Y) ou apontando para a pista (Z); padrão X
 	yaw: number?, -- giro em graus em torno de Y (múltiplos de 90)
+	rot: Vector3?, -- giro livre em graus (X, Y, Z), sem trocar o tamanho: cabelo espetado, telhado em prisma
 	color: Color3,
 	material: Enum.Material?,
 	transparency: number?,
@@ -95,6 +96,10 @@ function PropAssembler.place(parts: { BasePart }, recipe: Recipe, boxCFrame: CFr
 				size = Vector3.new(size.Z, size.Y, size.X)
 			end
 			rotation = CFrame.Angles(0, math.rad(yaw), 0) * rotation
+		end
+		local rot = spec.rot
+		if rot then
+			rotation = CFrame.Angles(math.rad(rot.X), math.rad(rot.Y), math.rad(rot.Z)) * rotation
 		end
 		part.Size = Vector3.new(math.max(size.X, 0.05), math.max(size.Y, 0.05), math.max(size.Z, 0.05))
 		part.CFrame = boxCFrame * CFrame.new(spec.pos * boxSize) * rotation

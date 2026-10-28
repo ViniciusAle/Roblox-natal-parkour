@@ -1,6 +1,8 @@
 --!strict
--- Heróis jogáveis (GDD seção 6). Herói novo = linha nova.
--- Cores são provisórias até existir modelo de cada herói; preços a definir.
+-- Personagens jogáveis (Anime Racers). Personagem novo = linha nova.
+-- Todos originais, em estilo anime de luta; um por raridade. Preços a definir.
+-- Visual: modelo em ReplicatedStorage.Assets.Characters.<id> quando existir (Blender ou Creator Store,
+-- registrado em docs/ASSETS.md); sem modelo, usa a receita de peças em Config/Props.
 
 export type HeroPassive = {
 	coinMultiplier: number?,
@@ -12,57 +14,68 @@ export type HeroPassive = {
 
 export type HeroDef = {
 	id: string,
-	color: Color3,
+	rarity: string, -- id em Config/Rarities
+	color: Color3, -- cor principal (aura, interface)
 	freeByDefault: boolean,
 	price: number?,
 	passive: HeroPassive,
 	activeId: string?, -- id em Abilities.HeroActives
-	recipe: string, -- visual provisório em Config/Props
-	modelId: string?, -- modelo final (Creator Store ou arte própria)
+	recipe: string, -- visual de peças em Config/Props (reserva quando não há modelo)
 }
 
 local ById: { [string]: HeroDef } = {
-	Elf = {
-		id = "Elf",
-		recipe = "HeroElf",
-		color = Color3.fromRGB(60, 170, 80),
+	-- Comum: aprendiz de jaqueta azul e cachecol vermelho
+	Riku = {
+		id = "Riku",
+		rarity = "Common",
+		recipe = "HeroRiku",
+		color = Color3.fromRGB(60, 120, 220),
 		freeByDefault = true,
 		passive = { coinMultiplier = 1.1 },
 	},
-	Santa = {
-		id = "Santa",
-		recipe = "HeroSanta",
-		color = Color3.fromRGB(210, 40, 40),
+	-- Raro: espadachim de cabelo rosa e quimono verde
+	Hana = {
+		id = "Hana",
+		rarity = "Rare",
+		recipe = "HeroHana",
+		color = Color3.fromRGB(80, 190, 120),
 		freeByDefault = false,
-		passive = { startShield = true, laneSwitchTimeMultiplier = 1.25 },
+		passive = { laneSwitchTimeMultiplier = 0.85 },
+		activeId = "Dash",
 	},
-	Reindeer = {
-		id = "Reindeer",
-		recipe = "HeroReindeer",
-		color = Color3.fromRGB(140, 90, 50),
+	-- Épico: lutador grandão de moicano roxo
+	Gorou = {
+		id = "Gorou",
+		rarity = "Epic",
+		recipe = "HeroGorou",
+		color = Color3.fromRGB(160, 80, 230),
 		freeByDefault = false,
-		passive = {},
-		activeId = "NoseDash",
+		passive = { startShield = true, slideDurationMultiplier = 1.3 },
+		activeId = "Smash",
 	},
-	Snowman = {
-		id = "Snowman",
-		recipe = "HeroSnowman",
-		color = Color3.fromRGB(245, 245, 250),
+	-- Lendário: guerreiro de cabelo prateado e manto vermelho
+	Ryuga = {
+		id = "Ryuga",
+		rarity = "Legendary",
+		recipe = "HeroRyuga",
+		color = Color3.fromRGB(230, 50, 60),
 		freeByDefault = false,
-		passive = { slideDurationMultiplier = 1.5 },
-		activeId = "SnowballRoll",
+		passive = { coinMultiplier = 1.2, startShield = true },
+		activeId = "Dash",
 	},
-	IceFairy = {
-		id = "IceFairy",
-		recipe = "HeroIceFairy",
-		color = Color3.fromRGB(150, 220, 255),
+	-- Secreto: guardiã celestial de cabelo azul-gelo e auréola
+	Akari = {
+		id = "Akari",
+		rarity = "Secret",
+		recipe = "HeroAkari",
+		color = Color3.fromRGB(120, 230, 255),
 		freeByDefault = false,
-		passive = { glideDurationMultiplier = 1.75 },
-		activeId = "TimeFreeze",
+		passive = { glideDurationMultiplier = 1.75, coinMultiplier = 1.25 },
+		activeId = "TimeSlow",
 	},
 }
 
 return {
 	ById = ById,
-	Order = { "Elf", "Santa", "Reindeer", "Snowman", "IceFairy" },
+	Order = { "Riku", "Hana", "Gorou", "Ryuga", "Akari" },
 }
