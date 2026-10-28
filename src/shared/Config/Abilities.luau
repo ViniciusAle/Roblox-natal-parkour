@@ -18,6 +18,7 @@ export type UpgradeDef = {
 export type HeroActiveDef = {
 	cooldown: number,
 	effect: Types.Effect,
+	blastRange: number?, -- rajada: destrói o primeiro obstáculo à frente na pista, até esta distância (studs)
 }
 
 -- Itens pegos na pista
@@ -50,7 +51,12 @@ local HeroActives: { [string]: HeroActiveDef } = {
 	Dash = { cooldown = 30, effect = { duration = 2, speedMultiplier = 1.5, invulnerable = true } },
 	Smash = { cooldown = 30, effect = { duration = 3, crushKinds = { Low = true } } },
 	TimeSlow = { cooldown = 35, effect = { duration = 2.5, timeScale = 0.6 } },
+	EnergyBlast = { cooldown = 18, effect = { duration = 0.5 }, blastRange = 70 },
 }
+
+-- Transformação (energia cheia): mais rápido, imune a batidas e puxando moedas.
+-- Sem multiplicador de moedas, para não passar do limite que o servidor aceita.
+local Transform: Types.Effect = { duration = 7, speedMultiplier = 1.2, invulnerable = true, magnet = true }
 
 -- Maior multiplicador de moedas possível ao mesmo tempo (usado na validação do servidor)
 local function maxEffectCoinMultiplier(): number
@@ -74,5 +80,6 @@ return {
 	MagnetPerLevel = MagnetPerLevel,
 	Consumables = Consumables,
 	HeroActives = HeroActives,
+	Transform = Transform,
 	maxEffectCoinMultiplier = maxEffectCoinMultiplier,
 }

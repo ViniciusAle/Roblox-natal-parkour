@@ -1,6 +1,7 @@
 --!strict
--- Garante que um chunk é justo: dentro dos limites, sem sobreposições impossíveis
--- e com pelo menos uma rota livre de ponta a ponta (GDD seção 5, "Justiça").
+-- Garante que um chunk é justo: dentro dos limites, sem sobreposições impossíveis,
+-- com pelo menos uma rota livre de ponta a ponta (GDD seção 5, "Justiça")
+-- e sem pista que fique livre o chunk inteiro (não dá para passar parado).
 
 local GameConfig = require(script.Parent.Config.GameConfig)
 local Abilities = require(script.Parent.Config.Abilities)
@@ -98,6 +99,22 @@ function ChunkValidator.validate(chunk: Types.ChunkDef): { string }
 			local b = solids[j]
 			if a.object.lane == b.object.lane and overlaps(a.z0, a.z1, b.z0, b.z1) then
 				fail(`{a.object.kind} e {b.object.kind} sobrepostos na pista {a.object.lane}`)
+			end
+		end
+	end
+
+	-- Sem pista livre o chunk inteiro: parado em qualquer pista, o jogador encontra um obstáculo
+	if chunk.special == nil then
+		local covered = table.create(LANES, false)
+		for _, solid in solids do
+			local kind = solid.object.kind
+			if kind == "Low" or kind == "High" or kind == "Block" then
+				covered[solid.object.lane :: number] = true
+			end
+		end
+		for lane = 1, LANES do
+			if not covered[lane] then
+				fail(`pista {lane} sem nenhum obstáculo`)
 			end
 		end
 	end

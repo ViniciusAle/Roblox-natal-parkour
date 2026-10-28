@@ -89,6 +89,13 @@ local GameConfig = {
 		CatchFollow = 4, -- alcançando o herói no fim da corrida
 	},
 
+	-- Energia: enche com moedas e distância; cheia, libera a transformação (Abilities.Transform)
+	Energy = {
+		Max = 100,
+		PerCoin = 2,
+		PerMeter = 0.12,
+	},
+
 	Revive = {
 		GraceSeconds = 2,
 	},
@@ -126,6 +133,15 @@ local GameConfig = {
 		HitShake = 0.9,
 	},
 
+	-- Animações padrão do Roblox para corpos R15 (as mesmas do script Animate)
+	Animations = {
+		Run = "rbxassetid://913376220",
+		Jump = "rbxassetid://507765000",
+		Fall = "rbxassetid://507767968",
+		Idle = "rbxassetid://507766666",
+		RunSpeed = 1.4, -- a corrida do jogo é rápida
+	},
+
 	Visuals = {
 		LeanAngle = 0.35,
 		CoinSize = Vector3.new(0.4, 2.2, 2.2),
@@ -144,6 +160,12 @@ local GameConfig = {
 		SideGroundDrop = 0.6, -- chão lateral um pouco abaixo da pista
 		RailTrimHeight = 0.4,
 		SeedSalt = 7919,
+		MaxModelParts = 300, -- modelo da loja com mais peças que isso não entra (usa a receita de reserva)
+		-- Aparelho de toque sem teclado (celular/tablet): menos cenário e menos chunks montados à frente
+		Mobile = {
+			Density = 0.6, -- fração de props e decoração
+			ChunksAhead = 4,
+		},
 	},
 
 	-- Efeitos de ambiente no cliente
@@ -199,6 +221,7 @@ local GameConfig = {
 			Jump = { Enum.KeyCode.Space, Enum.KeyCode.W, Enum.KeyCode.Up },
 			Slide = { Enum.KeyCode.S, Enum.KeyCode.LeftControl, Enum.KeyCode.Down },
 			Ability = { Enum.KeyCode.E, Enum.KeyCode.LeftShift },
+			Transform = { Enum.KeyCode.Q, Enum.KeyCode.R },
 		},
 	},
 
@@ -235,6 +258,7 @@ local GameConfig = {
 	Dev = {
 		-- No Studio todos os heróis e capítulos ficam liberados, para testar
 		UnlockAllInStudio = true,
+		LagLogInStudio = true, -- frames lentos da corrida aparecem no Output ([Lag])
 		StudioUpgrades = { DoubleJump = 1, ExtraLife = 0, MagnetPower = 2 },
 	},
 }

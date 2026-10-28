@@ -15,6 +15,7 @@ export type PartSpec = {
 	color: Color3,
 	material: Enum.Material?,
 	transparency: number?,
+	swing: number?, -- personagens: perna que balança ao correr (1 ou -1, fase oposta)
 }
 
 export type Recipe = {

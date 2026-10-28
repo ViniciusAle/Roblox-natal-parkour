@@ -1,6 +1,6 @@
 --!strict
--- Componentes visuais da interface (estilo "Anime Racers": azul-noite, laranja energia, dourado,
--- pergaminho ninja nos títulos). Layout por escala; textos com tamanho máximo para telas grandes.
+-- Componentes visuais da interface (estilo "Brainrot Rush": roxo-uva, rosa-choque, verde-limão, amarelo,
+-- adesivos tortos de contorno grosso nos títulos). Layout por escala; textos com tamanho máximo para telas grandes.
 -- Fontes por FontFace; ícones desenhados com frames (iguais em todo aparelho, sem emoji nem upload).
 
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -12,22 +12,22 @@ local Ui = GameConfig.Ui
 local UiKit = {}
 
 UiKit.Colors = {
-	night = Color3.fromRGB(22, 24, 48),
-	nightLight = Color3.fromRGB(44, 48, 92),
-	orange = Color3.fromRGB(255, 136, 30),
-	orangeDark = Color3.fromRGB(190, 80, 10),
-	gold = Color3.fromRGB(255, 205, 60),
-	goldDark = Color3.fromRGB(180, 120, 20),
+	grape = Color3.fromRGB(42, 18, 72),
+	grapeLight = Color3.fromRGB(96, 40, 150),
+	pink = Color3.fromRGB(255, 70, 160),
+	pinkDark = Color3.fromRGB(160, 20, 95),
+	gold = Color3.fromRGB(255, 220, 50),
+	goldDark = Color3.fromRGB(190, 130, 10),
 	red = Color3.fromRGB(225, 50, 60),
 	redDark = Color3.fromRGB(130, 20, 32),
 	green = Color3.fromRGB(60, 200, 110),
 	greenDark = Color3.fromRGB(25, 110, 60),
-	cyan = Color3.fromRGB(90, 220, 255),
-	parchment = Color3.fromRGB(250, 236, 200),
-	parchmentDark = Color3.fromRGB(226, 200, 150),
-	wood = Color3.fromRGB(120, 72, 40),
-	woodDark = Color3.fromRGB(70, 40, 24),
-	ink = Color3.fromRGB(50, 30, 30),
+	lime = Color3.fromRGB(170, 255, 60),
+	paper = Color3.fromRGB(255, 240, 90),
+	paperDark = Color3.fromRGB(255, 196, 40),
+	outlineLight = Color3.fromRGB(255, 120, 190),
+	outline = Color3.fromRGB(20, 8, 34),
+	ink = Color3.fromRGB(30, 10, 50),
 	white = Color3.fromRGB(255, 255, 255),
 	mute = Color3.fromRGB(160, 165, 190),
 }
@@ -133,46 +133,47 @@ function UiKit.text(parent: Instance, name: string, size: UDim2, text: string, m
 	label.Parent = parent
 	UiKit.maxText(label, maxSize)
 	if color == nil then
-		UiKit.stroke(label, C.night, 2.5)
+		UiKit.stroke(label, C.grape, 2.5)
 	end
 	return label
 end
 
--- Painel azul-noite com borda dourada
+-- Painel roxo-uva com borda amarela
 function UiKit.panel(parent: Instance, name: string, size: UDim2, position: UDim2, anchor: Vector2): Frame
 	local panel = UiKit.frame(parent, name, size, position, anchor)
 	panel.BackgroundTransparency = 0.05
-	panel.BackgroundColor3 = C.night
+	panel.BackgroundColor3 = C.grape
 	UiKit.corner(panel, 0.06)
 	UiKit.stroke(panel, C.gold, 3, true)
-	UiKit.gradient(panel, C.nightLight, C.night)
+	UiKit.gradient(panel, C.grapeLight, C.grape)
 	return panel
 end
 
--- Pergaminho ninja de título preso no topo de um painel: papel no meio e rolos de madeira nas pontas
+-- Adesivo de título preso no topo de um painel: faixa amarela torta, contorno grosso e sombra rosa
 function UiKit.scroll(panel: Frame, text: string)
-	local scroll = UiKit.frame(panel, "Scroll", UDim2.fromScale(0.86, 0.15), UDim2.fromScale(0.5, 0), Vector2.new(0.5, 0.55))
-	scroll.ZIndex = 3
+	local sticker = UiKit.frame(panel, "Sticker", UDim2.fromScale(0.8, 0.14), UDim2.fromScale(0.5, 0), Vector2.new(0.5, 0.55))
+	sticker.ZIndex = 3
+	sticker.Rotation = -3
 
-	local paper = UiKit.shape(scroll, "Paper", UDim2.fromScale(0.86, 0.82), UDim2.fromScale(0.5, 0.5), C.parchment, 0.08)
-	paper.ZIndex = 3
-	UiKit.gradient(paper, C.parchment, C.parchmentDark)
-	UiKit.stroke(paper, C.woodDark, 2, true)
-	local band = UiKit.shape(paper, "Band", UDim2.fromScale(1, 0.12), UDim2.fromScale(0.5, 0.86), C.red)
-	band.ZIndex = 4
+	local shadow = UiKit.shape(sticker, "Shadow", UDim2.fromScale(1, 1), UDim2.new(0.5, 6, 0.5, 6), C.pink, 0.25)
+	shadow.ZIndex = 3
+	local paper = UiKit.shape(sticker, "Paper", UDim2.fromScale(1, 1), UDim2.fromScale(0.5, 0.5), C.paper, 0.25)
+	paper.ZIndex = 4
+	UiKit.gradient(paper, C.paper, C.paperDark)
+	UiKit.stroke(paper, C.outline, 4, true)
 
+	-- Estrelinhas nas pontas
 	for _, side in { 0, 1 } do
-		local rod = UiKit.shape(scroll, `Rod{side}`, UDim2.fromScale(0.09, 1), UDim2.fromScale(0.05 + side * 0.9, 0.5), C.wood, 0.5)
-		rod.ZIndex = 4
-		UiKit.gradient(rod, C.wood, C.woodDark, 0)
-		UiKit.stroke(rod, C.woodDark, 2, true)
-		local knob = UiKit.shape(scroll, `Knob{side}`, UDim2.fromScale(0.05, 0.3), UDim2.fromScale(0.05 + side * 0.9, 0.5), C.gold, 0.5)
-		knob.ZIndex = 5
+		local star = UiKit.shape(sticker, `Star{side}`, UDim2.fromScale(0.07, 0.45), UDim2.fromScale(0.02 + side * 0.96, 0.15), C.lime)
+		star.Rotation = 45
+		star.ZIndex = 5
+		UiKit.aspect(star, 1)
+		UiKit.stroke(star, C.outline, 2, true)
 	end
 
-	local label = UiKit.text(paper, "Title", UDim2.fromScale(0.9, 0.72), text, 40, C.ink)
+	local label = UiKit.text(paper, "Title", UDim2.fromScale(0.9, 0.78), text, 40, C.ink)
 	label.AnchorPoint = Vector2.new(0.5, 0.5)
-	label.Position = UDim2.fromScale(0.5, 0.45)
+	label.Position = UDim2.fromScale(0.5, 0.5)
 	label.ZIndex = 5
 end
 
@@ -202,14 +203,14 @@ function UiKit.pressable(button: GuiButton)
 	end)
 end
 
-export type ButtonStyle = "Orange" | "Green" | "Red" | "Gold" | "Dark"
+export type ButtonStyle = "Pink" | "Green" | "Red" | "Gold" | "Dark"
 
 local STYLES: { [ButtonStyle]: { top: Color3, bottom: Color3, stroke: Color3, text: Color3 } } = {
-	Orange = { top = Color3.fromRGB(255, 175, 70), bottom = C.orange, stroke = C.orangeDark, text = C.white },
+	Pink = { top = Color3.fromRGB(255, 140, 200), bottom = C.pink, stroke = C.pinkDark, text = C.white },
 	Green = { top = Color3.fromRGB(110, 230, 140), bottom = C.green, stroke = C.greenDark, text = C.white },
 	Red = { top = Color3.fromRGB(245, 95, 100), bottom = C.red, stroke = C.redDark, text = C.white },
 	Gold = { top = Color3.fromRGB(255, 230, 120), bottom = C.gold, stroke = C.goldDark, text = C.ink },
-	Dark = { top = C.nightLight, bottom = C.night, stroke = C.gold, text = C.white },
+	Dark = { top = C.grapeLight, bottom = C.grape, stroke = C.gold, text = C.white },
 }
 
 local clickSound: Sound? = nil
@@ -274,7 +275,7 @@ function UiKit.speedIcon(parent: Instance): Frame
 	UiKit.aspect(holder, 1)
 	for i = 0, 2 do
 		local x = 0.25 + i * 0.25
-		local color = if i == 2 then C.orange else C.cyan
+		local color = if i == 2 then C.pink else C.lime
 		local top = UiKit.shape(holder, `ArrowTop{i}`, UDim2.fromScale(0.36, 0.12), UDim2.fromScale(x, 0.38), color, 0.5)
 		top.Rotation = 40
 		local bottom = UiKit.shape(holder, `ArrowBottom{i}`, UDim2.fromScale(0.36, 0.12), UDim2.fromScale(x, 0.62), color, 0.5)
@@ -287,7 +288,7 @@ end
 function UiKit.pill(parent: Instance, name: string, size: UDim2, position: UDim2, anchor: Vector2, icon: "Coin" | "Speed"): TextLabel
 	local pill = UiKit.frame(parent, name, size, position, anchor)
 	pill.BackgroundTransparency = 0.15
-	pill.BackgroundColor3 = C.night
+	pill.BackgroundColor3 = C.grape
 	UiKit.corner(pill, 0.5)
 	UiKit.stroke(pill, C.gold, 3, true)
 

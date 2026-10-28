@@ -1,6 +1,6 @@
 --!strict
 -- Vilões. O perseguidor está desligado por enquanto (GameConfig.Chaser.Enabled = false);
--- fica aqui para voltar depois. Todos originais.
+-- fica aqui para voltar depois (almôndega queimada). Todos originais.
 
 export type VillainDef = {
 	id: string,
@@ -11,8 +11,8 @@ export type VillainDef = {
 }
 
 local ById: { [string]: VillainDef } = {
-	ShadowNinja = {
-		id = "ShadowNinja",
+	BurntMeatball = {
+		id = "BurntMeatball",
 		recipe = "ChaserShadow",
 		kind = "Chaser",
 		color = Color3.fromRGB(25, 22, 32),

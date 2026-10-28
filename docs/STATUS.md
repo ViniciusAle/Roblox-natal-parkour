@@ -1,5 +1,166 @@
 # Status do projeto
 
+## Sessão 29/10/2026 (parte 4): o jogo congelava ao entrar
+
+- **Causa (log do Studio):** `PropPool:168: Script timeout`. A pré-carga reescalava um modelo enorme (o Coliseu)
+  e o script estourou o tempo; o Studio ficou travado.
+- **Fundo só com montanhas:** saíram Coliseu, farol, galeão, Saturno, disco voador e torres alienígenas do fundo.
+  Praça e praia usam `MountainGreen`; espaço usa a receita `MistyMountain`. Os modelos saíram de `Config/Models`.
+- **Limite de peças:** modelo da loja com mais de `Scenery.MaxModelParts` (300) peças não entra; usa a receita de reserva
+  e avisa no Output (`[ModelLibrary] ... peças`).
+- Não testado no Studio.
+
+## Sessão 29/10/2026 (parte 3): lag no celular e Bombardiro
+
+- **Bombardiro continuava o antigo:** o `ImportModels.lua` pulava personagens que já existiam (e o arquivo estava vazio no disco;
+  foi reescrito). Agora cada modelo importado guarda o atributo `AssetId`; se o id em `Config/Heroes` mudar, o modelo é trocado sozinho.
+  O importador também avisa os modelos com mais de 150 peças.
+- **Lag:**
+  - Personagem: as transparências de todas as peças eram reescritas a cada frame; agora só quando o piscar muda.
+  - Modelos da loja (personagem e cenário) ficam soldados numa raiz ancorada (`ModelLibrary.weldToRoot`): mover = mover uma peça.
+  - A pré-carga pausa durante a corrida e já deixa cada modelo na escala de uso (`ScaleTo` é caro).
+  - Menos cenário: 4 props por lado e decoração a cada 9 studs; em celular/tablet, 60% disso e 4 chunks à frente (`Scenery.Mobile`).
+  - Medidor no Studio: frames acima de 33 ms aparecem no Output como `[Lag]`, com o tempo do script e o que a pista fez no frame.
+- Não testado no Studio.
+
+## Sessão 29/10/2026 (parte 2): travamentos nas trocas de tela e modelos dos brainrots
+
+- **Travamento ao jogar de novo / voltar ao lobby / entrar no mapa:** cada corrida clonava todos os modelos da loja
+  e destruía tudo no fim. Agora `PropPool.shared()` e os pools de peças da `Track` ficam em pastas que sobrevivem às
+  corridas (`Workspace.PropCache`, `Workspace.TrackCache`); `Track.prewarm()` clona os modelos de todas as fases aos poucos
+  enquanto o jogador está no lobby, e esconder o que saiu de uso também é feito aos poucos.
+- **Frente dos modelos:** a direção vem da PrimaryPart (só o giro horizontal) ou da raiz do Humanoid; `rot` corrige o resto.
+- **Tralalero ficava em pé ao deslizar:** modelos deitados (mais compridos que altos) agora encolhem ao deslizar.
+- **Bombardiro:** trocado pelo 91327024837680 (F0g_02), o crocodilo-avião do meme.
+- Não testado no Studio.
+
+## Sessão 29/10/2026: travamentos, Coliseu e modelos prontos dos brainrots
+
+- **Micro travamentos:** cada novo chunk montava ~35 props de cenário (modelos da loja com muitas peças) num frame só.
+  Agora o cenário entra numa fila em `Track` e é montado com orçamento de 2 ms por frame; o início da corrida monta tudo de uma vez.
+- **Coliseu deitado/torto:** `ModelLibrary` media a caixa pela PrimaryPart do modelo, que vinha girada. Agora mede nos eixos do mundo;
+  se um modelo ainda vier torto, use o campo `rot` em `Config/Models`.
+- **Modelos prontos dos brainrots:** a loja tem vários. Escolhi um de cada (sem scripts) no campo `model` de `Config/Heroes`;
+  o `ImportModels.lua` agora também baixa esses para `Assets.Characters`. Modelos sem esqueleto quicam e rebolam por código.
+  Se algum vier de costas ou deitado, use `model.rot` (ex.: `Vector3.new(0, 180, 0)`).
+- Não testado no Studio.
+
+## Sessão 28/10/2026 (parte 6): brainrots famosos
+
+O usuário decidiu usar os brainrots famosos, sabendo do risco (pedido de marca do "Tralalero Tralala", remoção do
+Tung Tung Tung Sahur no Steal a Brainrot, processo por cópia de arte). Detalhes em `docs/ASSETS.md`.
+
+- Comum **Brr Brr Patapim**; Raro **Ballerina Cappuccina** (Pirueta turbo); Épico **Tung Tung Tung Sahur** (Tacada Sahur);
+  Lendário **Tralalero Tralala** (Tralala lento); Secreto **Bombardiro Crocodilo** (Bombardeio).
+- Montados do zero com peças (`HeroPatapim`, `HeroBallerina`, `HeroTung`, `HeroTralalero`, `HeroBombardiro` em `Config/Props`).
+- As criaturas originais da parte 5 ficaram como reserva, para trocar rápido se algum famoso receber denúncia.
+- Nome do jogo e logo continuam originais. Não testado no Studio.
+
+## Sessão 28/10/2026 (parte 5): o jogo virou Brainrot Rush
+
+O tema anime tinha problema de direitos autorais (o usuário queria personagens de Dragon Ball). O usuário pediu para
+refazer tudo com tema brainrot. O motor da corrida (pistas, chunks, servidor, energia, poderes) ficou igual; mudou o tema.
+
+### Decisões
+
+- **Nome provisório:** Brainrot Rush ("Corra. Desvie. Fique maluco.").
+- **Personagens originais**, no estilo brainrot (bicho + objeto, nome de italiano inventado). Ficaram de fora os memes
+  existentes (Tralalero Tralala, Tung Tung Tung Sahur, Bombardiro Crocodilo, Lirilì Larilà, Frigo Camelo, Il Cacto Hipopotamo,
+  Dragon Cannelloni etc.), porque têm donos e alguns viraram marca registrada. Também evitei combinações muito parecidas com eles.
+  - Comum: **Pollo Polpetto**, almôndega com pernas de galinha e um garfo espetado.
+  - Raro: **Lumaca Lampadina**, lesma de tênis com uma lâmpada acesa no lugar da concha (poder: Gosma turbo).
+  - Épico: **Granchio Gelatino**, caranguejo com casquinha de três bolas de sorvete (poder: Pinça esmagadora).
+  - Lendário: **Gufo Sveglietta**, coruja-despertador com sinos e chave de corda (poder: Soneca do tempo).
+  - Secreto: **Balena Mongolfiera**, baleia-balão de coroa e cesto, de tênis rosa (poder: Jato d'água, destrói o obstáculo à frente).
+- **Fases:**
+  - **Piazza Pizza:** praça italiana. Obstáculos: caixas de pizza, arco de grissini com espaguete pendurado e cafeteira moka gigante de bigode.
+  - **Spiaggia Banana:** praia. Obstáculos: castelo de areia, banana gigante com toalhas penduradas e coco de canudinho.
+  - **Cosmo Caotico:** espaço roxo neon. Obstáculos: rochas de cristal, disco voador abduzindo uma pizza e foguete.
+  - Todos os obstáculos grandes têm olhos esbugalhados virados para o jogador.
+- **Lobby:** praça italiana com canais, cafeteira gigante com a placa do jogo, arco de espaguete, ciprestes, casas coloridas, fontes, mesinhas de café, lambretas e confete.
+- **Interface:** roxo-uva, rosa-choque, verde-limão e amarelo; títulos em adesivo torto; logo "BRAINROT RUSH".
+- **Textos:** a energia virou "CAOS" e a transformação virou "MODO BRAINROT".
+- **Música:** acordeão italiano (lobby), tarantela, música praiana e techno (contas oficiais APM e DistroKid).
+
+### Feito no código
+
+- Personagens feitos de peças (`creature` em `Config/Props`), com rebolado e pernas que balançam ao correr (`swing`, em `RunnerView`).
+- 6 obstáculos novos em receitas; 21 modelos novos da Creator Store em `Config/Models` (os da vila japonesa saíram).
+- O fundo agora aceita `elevation` (Saturno e o disco voador flutuam).
+- Ids internos trocados: personagens, fases (`PizzaPiazza`, `BananaBeach`, `ChaosCosmos`), nomes de GUI e o projeto Rojo (`BrainrotRush`).
+- A sintaxe de todos os arquivos passou no `luau-compile`.
+
+### Não testado
+
+- Nada desta parte rodou no Studio.
+- É preciso rodar `tools/ImportModels.lua` de novo para baixar os modelos novos.
+- Os modelos antigos da vila japonesa podem ser apagados de `ReplicatedStorage.Assets.Props`, assim como os corpos R15 antigos de `Assets.Characters`.
+- Algum modelo pode falhar ("not authorized"); nesse caso entra a receita reserva e eu troco o id.
+
+## Sessão 28/10/2026 (parte 4): transformação, rajada e aura
+
+O usuário decidiu seguir com os personagens originais e pediu poderes de "anime de luta".
+
+### Feito
+
+- **Energia:** enche com moedas (+2) e distância (+0,12 por metro) até 100 (`GameConfig.Energy`). Aparece numa barra embaixo das moedas.
+- **Transformação** (botão TRANSFORMAR, ou teclas Q ou R, com a energia cheia):
+  - 7 s mais rápido (x1,2), imune a batidas e puxando moedas (`Abilities.Transform`);
+  - visual: aura forte, luz, contorno brilhante (Highlight) e rastro mais longo, na cor do personagem;
+  - não multiplica moedas, para ficar dentro do limite que o servidor aceita.
+- **Rajada de energia** (habilidade do Ryuga): destrói o primeiro obstáculo à frente na pista do personagem, até 70 studs, com explosão de partículas. Sem alvo à frente, a recarga não é gasta.
+- **Rastro de energia** sempre ligado, em todos os personagens; aura sempre ligada a partir de Épico.
+- **Sons novos:** Thunder Crack (transformação) e Blaster Burst (rajada).
+
+### Não testado
+
+- Nada desta parte rodou no Studio.
+
+
+## Sessão 28/10/2026 (parte 3): ajustes depois do primeiro teste com modelos
+
+Problemas que o usuário viu nos prints, e as correções:
+
+- **Personagens com tamanho e posição diferentes.** A escala e os pés agora são medidos pela raiz e pela cabeça do corpo R15, e não pela caixa do modelo (cabelos e acessórios longos distorciam a medida).
+- **Obstáculos amontoados nas bordas; dava para passar a fase parado no meio.**
+  - Os 22 chunks foram refeitos com fileiras e zigue-zagues.
+  - Regra nova no `ChunkValidator`: fora dos especiais, toda pista tem pelo menos um obstáculo.
+  - Os blocos ficaram mais curtos (até 26 studs) para não virar fileira de casas.
+- **Mapa "morto".**
+  - 5 props por lado (eram 3);
+  - decoração pequena a cada ~7 studs (arbustos, pedras, flores, lanternas, cogumelos brilhantes, cristais);
+  - cerca japonesa contínua na Vila Ninja;
+  - fundo dos dois lados.
+  - São 15 modelos novos em `Config/Models`. É preciso rodar `tools/ImportModels.lua` de novo para baixar só os novos.
+- **Personagens de Dragon Ball:** pedidos de novo; continuam originais.
+
+
+## Sessão 28/10/2026 (parte 2): personagens R15 e cenário com modelos prontos
+
+O usuário achou o visual de peças "parecendo jogo de 1990" e pediu assets prontos do Roblox.
+
+### Feito
+
+- **Personagens:**
+  - corpos R15 montados pelo servidor (`CharacterBuilder`) com itens de avatar criados pelo Roblox (cabelo, camisa, calça, cor de pele, escala), definidos em `Heroes.avatar`;
+  - animações padrão do Roblox de corrida, pulo, queda e parado;
+  - continuam originais (o usuário pediu de novo os personagens de Dragon Ball; mantive a recusa pelo risco de direitos autorais).
+- **Cenário:**
+  - 22 modelos gratuitos da Creator Store (`Config/Models`), escolhidos pelas miniaturas;
+  - usados no cenário lateral, no fundo e no lobby;
+  - encaixados por escala uniforme na caixa de cada prop (`ModelLibrary`);
+  - sem o modelo importado, cai na receita de peças.
+- **Obstáculos:** continuam em receitas de peças, porque a forma precisa bater com a caixa de colisão.
+- **Importação:** `tools/ImportModels.lua`, para colar uma vez na Command Bar do Studio.
+
+### Não testado
+
+- Nada rodou no Studio. Falta conferir:
+  - a importação (`game:GetObjects`);
+  - a escala e a orientação dos modelos;
+  - se o corpo R15 anima com a raiz ancorada;
+  - se `CreateHumanoidModelFromDescription` aceita todos os itens.
+
 ## Sessão 28/10/2026: mudança de tema para "Anime Racers" (nome provisório)
 
 Decisões do usuário:

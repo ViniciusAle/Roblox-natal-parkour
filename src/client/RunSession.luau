@@ -33,6 +33,7 @@ local TrackConfig = GameConfig.Track
 local Obstacles = GameConfig.Obstacles
 local RunnerSize = GameConfig.Runner
 local Coins = GameConfig.Coins
+local START_BUDGET = 0.006 -- segundos por frame para montar o cenário durante a contagem de largada
 
 export type EndReason = "Crash" | "Caught" | "Fall"
 
@@ -71,6 +72,9 @@ type SessionData = {
 	currentChunk: number,
 	effects: { ActiveEffect },
 	abilityCooldown: number,
+	energy: number, -- 0 a GameConfig.Energy.Max; cheia libera a transformação
+	transformed: boolean,
+	lastDistance: number,
 	ended: boolean,
 }
 
@@ -128,6 +132,9 @@ function RunSession.new(
 	self.currentChunk = -1
 	self.effects = {}
 	self.abilityCooldown = 0
+	self.energy = 0
+	self.transformed = false
+	self.lastDistance = 0
 	self.ended = false
 
 	local session = setmetatable(self, RunSession)
@@ -141,7 +148,7 @@ function RunSession.new(
 		session:_onRunnerEvent(event, value)
 	end)
 
-	track:update(0)
+	track:update(0, START_BUDGET)
 	ChapterAmbience.apply(loadout.chapterId, true)
 	self.ambient:setChapter(loadout.chapterId)
 	Music.play(loadout.chapterId)
@@ -150,6 +157,7 @@ function RunSession.new(
 	hud:setDistance(0)
 	hud:setEffects("")
 	hud:setAbility(if hero.activeId then 0 else -1)
+	hud:setEnergy(0, false)
 	return session
 end
 
@@ -161,6 +169,8 @@ function RunSession.press(self: RunSession, action: Input.Action)
 	end
 	if action == "Ability" then
 		self:_useAbility()
+	elseif action == "Transform" then
+		self:_transform()
 	else
 		self.runner:press(action :: Runner.MoveAction)
 	end
@@ -181,10 +191,57 @@ function RunSession._useAbility(self: RunSession)
 	if not def then
 		return
 	end
+	if def.blastRange and not self:_blast(def.blastRange) then
+		return -- nada à frente para destruir: não gasta a recarga
+	end
 	self:_addEffect(activeId, def.effect, 0)
 	self.abilityCooldown = def.cooldown
-	self.juice:play("PowerUp")
+	self.juice:play(if def.blastRange then "Blast" else "PowerUp")
 	self.camera:shake(0.3)
+end
+
+-- Rajada de energia: destrói o primeiro obstáculo à frente na pista do herói
+function RunSession._blast(self: RunSession, range: number): boolean
+	local runner = self.runner
+	local target: Track.Obstacle? = nil
+	for _, chunk in self.track:chunksAround(runner.distance) do
+		for _, obstacle in chunk.obstacles do
+			local ahead = obstacle.z1 - runner.distance
+			if
+				not obstacle.disabled
+				and ahead > 0
+				and ahead <= range
+				and math.abs(obstacle.x - runner.x) < TrackConfig.LaneWidth / 2
+				and (target == nil or obstacle.z0 < target.z0)
+			then
+				target = obstacle
+			end
+		end
+	end
+	if not target then
+		return false
+	end
+	self.track:blast(target, self.hero.color)
+	self.hud:flash(Strings.Blasted)
+	return true
+end
+
+-- Transformação: energia cheia vira alguns segundos de poder (Abilities.Transform)
+function RunSession._transform(self: RunSession)
+	if self.energy < GameConfig.Energy.Max or self.transformed then
+		return
+	end
+	self.energy = 0
+	self:_addEffect("Transform", Abilities.Transform, 0)
+	self.juice:play("Transform")
+	self.camera:shake(GameConfig.Camera.HitShake * 0.6)
+	self.hud:flash(Strings.Transformed)
+end
+
+function RunSession._gainEnergy(self: RunSession, amount: number)
+	if not self.transformed then
+		self.energy = math.min(GameConfig.Energy.Max, self.energy + amount)
+	end
 end
 
 -- Efeitos --------------------------------------------------------------------
@@ -370,6 +427,7 @@ function RunSession._collect(self: RunSession, coin: Track.Coin)
 	self.coins += Coins.Value * multiplier
 	self.juice:coin(self.time)
 	self.hud:setCoins(math.floor(self.coins))
+	self:_gainEnergy(GameConfig.Energy.PerCoin)
 end
 
 function RunSession._collide(self: RunSession, dt: number)
@@ -477,6 +535,11 @@ function RunSession._simulate(self: RunSession, dt: number)
 	self.runner.speedScale = penalty * self:_product("speedMultiplier")
 
 	self.runner:step(dt, self.groundAt)
+	local travelled = self.runner.distance - self.lastDistance
+	self.lastDistance = self.runner.distance
+	if travelled > 0 then
+		self:_gainEnergy(travelled * TrackConfig.MetersPerStud * GameConfig.Energy.PerMeter)
+	end
 	self:_checkChapter()
 	self:_collide(dt)
 	if self.ended then
@@ -505,7 +568,7 @@ function RunSession.update(self: RunSession, dt: number)
 				self.hud:setCountdown(nil)
 			end)
 		end
-		self.track:update(self.runner.distance)
+		self.track:update(self.runner.distance, START_BUDGET)
 	elseif not self.ended then
 		self.track:update(self.runner.distance)
 		local frame = math.min(dt, GameConfig.Simulation.MaxFrame) * self:_timeScale()
@@ -584,6 +647,18 @@ function RunSession._updateHud(self: RunSession)
 	if self.hero.activeId then
 		self.hud:setAbility(self.abilityCooldown)
 	end
+
+	local transformed = false
+	for _, active in self.effects do
+		if active.id == "Transform" then
+			transformed = true
+		end
+	end
+	if transformed ~= self.transformed then
+		self.transformed = transformed
+		self.runnerView:setTransformed(transformed)
+	end
+	self.hud:setEnergy(self.energy / GameConfig.Energy.Max, transformed)
 end
 
 function RunSession._render(self: RunSession, dt: number)

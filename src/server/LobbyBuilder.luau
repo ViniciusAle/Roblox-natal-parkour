@@ -1,8 +1,8 @@
 --!strict
--- Monta a vila do lobby: vila japonesa ao entardecer, avenida de pedra com canais de água,
--- portal torii gigante, templo com a placa do jogo, círculo dourado da fila, cerejeiras,
--- casas, lanternas de pedra acesas, bambuzal em volta e pétalas caindo.
--- Tudo com peças básicas e as mesmas receitas do jogo (Config/Props).
+-- Monta o lobby: praça italiana numa tarde dourada, avenida de pedra com canais de água,
+-- arco gigante de espaguete na entrada, cafeteira moka gigante com a placa do jogo, círculo dourado da fila,
+-- ciprestes, casas coloridas, postes acesos, fontes, mesinhas de café, lambretas e confete caindo.
+-- Usa os modelos prontos da Creator Store (Config/Models); sem eles, as receitas de peças (Config/Props).
 
 local Lighting = game:GetService("Lighting")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -13,24 +13,24 @@ local GameConfig = require(Shared.Config.GameConfig)
 local Props = require(Shared.Config.Props)
 local Strings = require(Shared.Config.Strings)
 local PropAssembler = require(Shared.PropAssembler)
+local ModelLibrary = require(Shared.ModelLibrary)
 
 local Lobby = GameConfig.Lobby
 local CENTER = Lobby.Center
 local GROUND_TOP = 0.2
+local LANTERN = Color3.fromRGB(255, 210, 130)
 local TITLE_FONT = Font.new("rbxasset://fonts/families/LuckiestGuy.json", Enum.FontWeight.Regular)
 
 local C = {
-	grass = Color3.fromRGB(118, 165, 92),
-	stone = Color3.fromRGB(182, 176, 166),
-	stoneDark = Color3.fromRGB(130, 126, 120),
-	water = Color3.fromRGB(70, 160, 210),
-	wood = Color3.fromRGB(120, 78, 45),
-	woodDark = Color3.fromRGB(70, 45, 30),
+	grass = Color3.fromRGB(120, 180, 90),
+	stone = Color3.fromRGB(226, 204, 168),
+	terracotta = Color3.fromRGB(196, 120, 80),
+	water = Color3.fromRGB(70, 170, 220),
 	gold = Color3.fromRGB(250, 196, 50),
-	red = Color3.fromRGB(206, 52, 40),
+	red = Color3.fromRGB(214, 48, 52),
+	green = Color3.fromRGB(60, 170, 80),
 	cream = Color3.fromRGB(252, 244, 222),
-	petal = Color3.fromRGB(255, 185, 210),
-	ink = Color3.fromRGB(40, 30, 50),
+	ink = Color3.fromRGB(60, 20, 90),
 }
 
 export type Pad = {
@@ -71,15 +71,37 @@ local function ring(count: number, radius: number, offsetAngle: number?): { CFra
 	return list
 end
 
--- A avenida (eixo Z, do spawn até o templo) fica livre de decoração
+-- A avenida (eixo Z, do spawn até a cafeteira) fica livre de decoração
 local function onAvenue(base: CFrame, halfWidth: number): boolean
 	local offset = base.Position - CENTER
 	return math.abs(offset.X) < halfWidth and offset.Z < Lobby.SpawnOffset.Z + 10
 end
 
-local function prop(parent: Instance, recipeName: string, base: CFrame, size: Vector3, collide: boolean): Model
-	-- base fica no chão; a caixa da receita é centrada
-	return PropAssembler.build(Props[recipeName], parent, base * CFrame.new(0, size.Y / 2, 0), size, collide)
+local function prop(parent: Instance, name: string, base: CFrame, size: Vector3, collide: boolean): Model
+	-- base fica no chão; a caixa é centrada
+	local box = base * CFrame.new(0, size.Y / 2, 0)
+	local source = ModelLibrary.source(name)
+	if source then
+		local fitted = ModelLibrary.prepare(source, nil, collide)
+		ModelLibrary.fit(fitted, box, size)
+		fitted.model.Parent = parent
+		return fitted.model
+	end
+	return PropAssembler.build(Props[ModelLibrary.fallback(name)], parent, box, size, collide)
+end
+
+-- Luz quente presa no alto de um prop (postes)
+local function glow(model: Model, color: Color3)
+	local box, size = model:GetBoundingBox()
+	local holder = block(model, "Glow", Vector3.new(0.5, 0.5, 0.5), box * CFrame.new(0, size.Y * 0.4, 0), color)
+	holder.Transparency = 1
+	holder.CanCollide = false
+	local light = Instance.new("PointLight")
+	light.Color = color
+	light.Range = 20
+	light.Brightness = 1.4
+	light.Shadows = false
+	light.Parent = holder
 end
 
 local function surfaceText(part: BasePart, face: Enum.NormalId, text: string, color: Color3, stroke: Color3?)
@@ -108,48 +130,48 @@ local function surfaceText(part: BasePart, face: Enum.NormalId, text: string, co
 end
 
 local function buildLighting()
-	Lighting.ClockTime = 17.3
-	Lighting.Brightness = 2.2
-	Lighting.Ambient = Color3.fromRGB(120, 100, 110)
-	Lighting.OutdoorAmbient = Color3.fromRGB(170, 150, 160)
-	Lighting.FogColor = Color3.fromRGB(255, 205, 195)
-	Lighting.FogEnd = 900
+	Lighting.ClockTime = 15.8
+	Lighting.Brightness = 2.7
+	Lighting.Ambient = Color3.fromRGB(140, 120, 115)
+	Lighting.OutdoorAmbient = Color3.fromRGB(190, 170, 155)
+	Lighting.FogColor = Color3.fromRGB(255, 225, 195)
+	Lighting.FogEnd = 950
 
 	local atmosphere = Lighting:FindFirstChildOfClass("Atmosphere") or Instance.new("Atmosphere")
-	atmosphere.Density = 0.28
-	atmosphere.Offset = 0.1
-	atmosphere.Color = Color3.fromRGB(255, 210, 205)
-	atmosphere.Decay = Color3.fromRGB(220, 130, 140)
-	atmosphere.Glare = 0.4
-	atmosphere.Haze = 1.4
+	atmosphere.Density = 0.25
+	atmosphere.Offset = 0.08
+	atmosphere.Color = Color3.fromRGB(255, 225, 195)
+	atmosphere.Decay = Color3.fromRGB(240, 170, 125)
+	atmosphere.Glare = 0.3
+	atmosphere.Haze = 1.1
 	atmosphere.Parent = Lighting
 
 	local bloom = Lighting:FindFirstChildOfClass("BloomEffect") or Instance.new("BloomEffect")
-	bloom.Intensity = 0.5
-	bloom.Size = 24
-	bloom.Threshold = 1.6
+	bloom.Intensity = 0.4
+	bloom.Size = 22
+	bloom.Threshold = 1.7
 	bloom.Parent = Lighting
 
 	local grading = Lighting:FindFirstChildOfClass("ColorCorrectionEffect") or Instance.new("ColorCorrectionEffect")
-	grading.TintColor = Color3.fromRGB(255, 244, 240)
-	grading.Saturation = 0.18
-	grading.Contrast = 0.06
+	grading.TintColor = Color3.fromRGB(255, 246, 236)
+	grading.Saturation = 0.3
+	grading.Contrast = 0.08
 	grading.Parent = Lighting
 end
 
 local function buildGround(folder: Folder)
 	block(folder, "Grass", Vector3.new(Lobby.GroundSize, 2, Lobby.GroundSize), CFrame.new(CENTER + Vector3.new(0, GROUND_TOP - 1, 0)), C.grass, Enum.Material.Grass)
 	disc(folder, "Plaza", Lobby.PlazaRadius, 0.4, CENTER + Vector3.new(0, GROUND_TOP, 0), C.stone, Enum.Material.Cobblestone)
-	disc(folder, "PlazaRing", Lobby.PlazaRadius - 6, 0.44, CENTER + Vector3.new(0, GROUND_TOP, 0), C.stoneDark, Enum.Material.Slate)
+	disc(folder, "PlazaRing", Lobby.PlazaRadius - 6, 0.44, CENTER + Vector3.new(0, GROUND_TOP, 0), C.terracotta, Enum.Material.Brick)
 	disc(folder, "PlazaInner", Lobby.PlazaRadius - 8, 0.48, CENTER + Vector3.new(0, GROUND_TOP, 0), C.stone, Enum.Material.Cobblestone)
 
-	-- Avenida de pedra do spawn até o templo, com canais de água dos dois lados
+	-- Avenida de pedra do spawn até a cafeteira gigante, com canais de água dos dois lados
 	local length = Lobby.SpawnOffset.Z - Lobby.TempleOffset.Z + 30
 	local midZ = (Lobby.SpawnOffset.Z + Lobby.TempleOffset.Z) / 2
-	block(folder, "Avenue", Vector3.new(22, 0.5, length), CFrame.new(CENTER + Vector3.new(0, GROUND_TOP + 0.05, midZ)), C.stoneDark, Enum.Material.Slate)
+	block(folder, "Avenue", Vector3.new(22, 0.5, length), CFrame.new(CENTER + Vector3.new(0, GROUND_TOP + 0.05, midZ)), C.terracotta, Enum.Material.Brick)
 	for _, side in { -1, 1 } do
 		local x = side * Lobby.CanalOffset
-		block(folder, "CanalEdge", Vector3.new(8, 0.8, length), CFrame.new(CENTER + Vector3.new(x, GROUND_TOP + 0.1, midZ)), C.stoneDark, Enum.Material.Slate)
+		block(folder, "CanalEdge", Vector3.new(8, 0.8, length), CFrame.new(CENTER + Vector3.new(x, GROUND_TOP + 0.1, midZ)), C.stone, Enum.Material.Cobblestone)
 		local water = block(folder, "Canal", Vector3.new(6, 0.4, length - 2), CFrame.new(CENTER + Vector3.new(x, GROUND_TOP + 0.35, midZ)), C.water, Enum.Material.Glass)
 		water.Transparency = 0.25
 		water.CanCollide = false
@@ -172,10 +194,10 @@ local function buildSpawn(folder: Folder)
 	end
 
 	local spawn = Instance.new("SpawnLocation")
-	spawn.Name = "VillageSpawn"
+	spawn.Name = "PiazzaSpawn"
 	spawn.Anchored = true
 	spawn.Size = Vector3.new(10, 0.6, 10)
-	spawn.CFrame = CFrame.new(CENTER + Lobby.SpawnOffset - Vector3.new(0, 2.6, 0)) -- olhando para o templo (-Z)
+	spawn.CFrame = CFrame.new(CENTER + Lobby.SpawnOffset - Vector3.new(0, 2.6, 0)) -- olhando para a cafeteira (-Z)
 	spawn.Color = C.red
 	spawn.Material = Enum.Material.SmoothPlastic
 	spawn.Neutral = true
@@ -184,24 +206,28 @@ local function buildSpawn(folder: Folder)
 	spawn.Parent = folder
 end
 
--- Templo ao fundo da avenida, com a placa "Anime Racers" e um portal torii gigante na frente
-local function buildTemple(folder: Folder)
+-- Marco ao fundo da avenida: cafeteira moka gigante com a placa do jogo, e um arco de espaguete na entrada
+local function buildLandmark(folder: Folder)
 	local base = CFrame.new(CENTER + Lobby.TempleOffset + Vector3.new(0, GROUND_TOP, 0))
-	block(folder, "TempleSteps", Vector3.new(44, 2, 16), base * CFrame.new(0, 1, 6), C.stoneDark, Enum.Material.Slate)
-	prop(folder, "Pagoda", base * CFrame.new(0, 2, -6), Vector3.new(34, 70, 34), true)
+	block(folder, "Steps", Vector3.new(44, 2, 16), base * CFrame.new(0, 1, 6), C.stone, Enum.Material.Cobblestone)
+	PropAssembler.build(Props.MokaPot, folder, base * CFrame.new(0, 2 + 24, -8), Vector3.new(36, 48, 36), true)
 
-	local board = block(folder, "TitleBoard", Vector3.new(30, 8, 1), base * CFrame.new(0, 18, 10), C.woodDark, Enum.Material.WoodPlanks)
+	local board = block(folder, "TitleBoard", Vector3.new(32, 8, 1), base * CFrame.new(0, 14, 14), C.cream)
 	surfaceText(board, Enum.NormalId.Back, Strings.Title, C.gold, C.ink)
-	block(folder, "TitleTrim", Vector3.new(31, 0.6, 1.2), base * CFrame.new(0, 22.2, 10), C.red)
-	block(folder, "TitleTrimLow", Vector3.new(31, 0.6, 1.2), base * CFrame.new(0, 13.8, 10), C.red)
+	block(folder, "TitleTrimGreen", Vector3.new(11, 0.8, 1.2), base * CFrame.new(-11, 18.4, 14), C.green)
+	block(folder, "TitleTrimWhite", Vector3.new(11, 0.8, 1.2), base * CFrame.new(0, 18.4, 14), C.cream)
+	block(folder, "TitleTrimRed", Vector3.new(11, 0.8, 1.2), base * CFrame.new(11, 18.4, 14), C.red)
+	for _, side in { -1, 1 } do
+		block(folder, "TitlePost", Vector3.new(1, 14, 1), base * CFrame.new(side * 15.5, 7, 14), C.ink)
+	end
 
 	local hint = block(folder, "HintBoard", Vector3.new(16, 3.4, 0.6), base * CFrame.new(0, 3.6, 22), C.cream)
 	surfaceText(hint, Enum.NormalId.Back, Strings.PortalHint, C.red)
 
-	-- Portal torii gigante sobre a avenida, entre o círculo e o spawn
-	prop(folder, "ToriiBeam", CFrame.new(CENTER + Vector3.new(0, GROUND_TOP, 8)), Vector3.new(30, 26, 3), false)
+	-- Arco gigante de espaguete sobre a avenida, entre o círculo e o spawn
+	PropAssembler.build(Props.SpaghettiArch, folder, CFrame.new(CENTER + Vector3.new(0, GROUND_TOP + 13, 8)), Vector3.new(30, 26, 8), false)
 
-	local sparkle = block(folder, "TempleSparkle", Vector3.new(30, 1, 20), base * CFrame.new(0, 40, -6), C.gold)
+	local sparkle = block(folder, "Sparkle", Vector3.new(30, 1, 20), base * CFrame.new(0, 52, -8), C.gold)
 	sparkle.Transparency = 1
 	sparkle.CanCollide = false
 	local emitter = Instance.new("ParticleEmitter")
@@ -244,85 +270,105 @@ local function buildPad(folder: Folder): Pad
 	status.TextScaled = true
 	status.TextColor3 = Color3.fromRGB(255, 240, 200)
 	status.TextStrokeTransparency = 0.1
-	status.TextStrokeColor3 = Color3.fromRGB(120, 20, 30)
+	status.TextStrokeColor3 = C.ink
 	status.Text = ""
 	status.Parent = billboard
 
 	return { position = position, radius = radius, status = status }
 end
 
+local function cypress(folder: Folder, base: CFrame, height: number, random: Random)
+	local name = if random:NextNumber() < 0.5 then "CypressA" else "CypressB"
+	prop(folder, name, base, Vector3.new(height * 0.32, height, height * 0.32), true)
+end
+
 local function buildDecor(folder: Folder)
 	local random = Random.new(2810)
 	local avenueHalf = Lobby.CanalOffset + 8
 
-	-- Cerejeiras em volta da praça (e duas grandes ao lado do templo)
+	-- Ciprestes em volta da praça (e dois grandes ao lado da cafeteira)
 	for _, base in ring(Lobby.TreeCount, Lobby.TreeRing, 0.3) do
 		if not onAvenue(base, avenueHalf) then
-			local height = random:NextNumber(16, 22)
-			prop(folder, "SakuraTree", base, Vector3.new(height * 0.8, height, height * 0.8), true)
+			cypress(folder, base, random:NextNumber(16, 24), random)
 		end
 	end
 	for _, side in { -1, 1 } do
-		local base = CFrame.new(CENTER + Lobby.TempleOffset + Vector3.new(side * 34, GROUND_TOP, 8))
-		prop(folder, "SakuraTree", base, Vector3.new(24, 28, 24), true)
+		local base = CFrame.new(CENTER + Lobby.TempleOffset + Vector3.new(side * 30, GROUND_TOP, 8))
+		prop(folder, "CypressA", base, Vector3.new(9, 28, 9), true)
 	end
 
-	-- Casas japonesas em anel
-	for _, base in ring(Lobby.HouseCount, Lobby.HouseRing, 0.4) do
+	-- Casas coloridas em anel
+	local houses = { "ItalianHouseYellow", "EuroBuilding", "RedRoofHouse", "ShopHouse" }
+	for i, base in ring(Lobby.HouseCount, Lobby.HouseRing, 0.4) do
 		if not onAvenue(base, avenueHalf + 10) then
-			prop(folder, "JapaneseHouse", base, Vector3.new(22, 22, 18), true)
+			prop(folder, houses[(i - 1) % #houses + 1], base, Vector3.new(26, 28, 26), true)
 		end
 	end
 
-	-- Lanternas de pedra acesas na borda da praça e ao longo dos canais
+	-- Postes acesos na borda da praça e ao longo dos canais
 	for _, base in ring(Lobby.LanternCount, Lobby.LanternRing, 0.15) do
 		if not onAvenue(base, avenueHalf) then
-			prop(folder, "StoneLanternLit", base, Vector3.new(3, 6, 3), true)
+			glow(prop(folder, "StreetLampModel", base, Vector3.new(2.4, 11, 2.4), true), LANTERN)
 		end
 	end
 	local z = Lobby.SpawnOffset.Z
 	while z > Lobby.TempleOffset.Z + 12 do
 		for _, side in { -1, 1 } do
 			local base = CFrame.new(CENTER + Vector3.new(side * (Lobby.CanalOffset - 7), GROUND_TOP, z))
-			prop(folder, "StoneLanternLit", base, Vector3.new(2.4, 5, 2.4), true)
+			glow(prop(folder, "StreetLampModel", base, Vector3.new(2.2, 10, 2.2), true), LANTERN)
 		end
 		z -= 22
 	end
 
-	-- Bambuzal fechando a vila
-	for _, base in ring(Lobby.ForestCount, Lobby.ForestRing, 0.05) do
-		local height = random:NextNumber(22, 34)
-		local jitter = CFrame.new(random:NextNumber(-10, 10), 0, random:NextNumber(-10, 10))
-		prop(folder, "Bamboo", base * jitter, Vector3.new(10, height, 10), true)
+	-- Fontes, mesinhas de café, carrinho de sorvete e lambretas na praça
+	for _, side in { -1, 1 } do
+		prop(folder, "FountainModel", CFrame.new(CENTER + Vector3.new(side * 48, GROUND_TOP, -8)), Vector3.new(16, 12, 16), true)
+		for i = 0, 2 do
+			local base = CFrame.new(CENTER + Vector3.new(side * 50, GROUND_TOP, 20 + i * 9)) * CFrame.Angles(0, random:NextNumber(0, math.pi), 0)
+			prop(folder, "CafeTable", base, Vector3.new(6, 6, 6), true)
+		end
+		local cart = CFrame.lookAt(CENTER + Vector3.new(side * 18, GROUND_TOP, 30), CENTER + Vector3.new(0, GROUND_TOP, 30))
+		prop(folder, "GelatoCart", cart, Vector3.new(6, 7, 5), true)
+		local scooter = CFrame.new(CENTER + Vector3.new(side * 22, GROUND_TOP, -40)) * CFrame.Angles(0, side * 0.6, 0)
+		prop(folder, if side < 0 then "ScooterOrange" else "ScooterWhite", scooter, Vector3.new(3.4, 3.4, 5.6), true)
 	end
 
-	-- Montanhas ao longe
+	-- Fileira de ciprestes fechando a praça
+	for _, base in ring(Lobby.ForestCount, Lobby.ForestRing, 0.05) do
+		local jitter = CFrame.new(random:NextNumber(-10, 10), 0, random:NextNumber(-10, 10))
+		cypress(folder, base * jitter, random:NextNumber(22, 34), random)
+	end
+
+	-- Morros verdes ao longe
 	for i = 1, 5 do
 		local angle = math.pi * 1.25 + (i - 1) * 0.3
 		local base = CFrame.new(CENTER + Vector3.new(math.cos(angle) * 300, GROUND_TOP, math.sin(angle) * 300))
-		local height = random:NextNumber(90, 140)
-		prop(folder, "MistyMountain", base, Vector3.new(height * 1.8, height, height * 1.8), false)
+		local height = random:NextNumber(70, 110)
+		prop(folder, "MountainGreen", base, Vector3.new(height * 1.8, height, height * 1.8), false)
 	end
 
-	-- Pétalas de cerejeira caindo sobre a vila
-	local sky = block(folder, "Petals", Vector3.new(300, 1, 300), CFrame.new(CENTER + Vector3.new(0, 70, 0)), Color3.new(1, 1, 1))
+	-- Confete verde, branco e vermelho caindo sobre a praça
+	local sky = block(folder, "Confetti", Vector3.new(300, 1, 300), CFrame.new(CENTER + Vector3.new(0, 70, 0)), Color3.new(1, 1, 1))
 	sky.Transparency = 1
 	sky.CanCollide = false
 	sky.CanQuery = false
-	local petals = Instance.new("ParticleEmitter")
-	petals.Shape = Enum.ParticleEmitterShape.Box
-	petals.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
-	petals.EmissionDirection = Enum.NormalId.Bottom
-	petals.Rate = 50
-	petals.Lifetime = NumberRange.new(12, 16)
-	petals.Speed = NumberRange.new(3, 6)
-	petals.SpreadAngle = Vector2.new(30, 30)
-	petals.Rotation = NumberRange.new(0, 360)
-	petals.RotSpeed = NumberRange.new(-120, 120)
-	petals.Size = NumberSequence.new(0.4)
-	petals.LightInfluence = 0
-	petals.Color = ColorSequence.new(C.petal, Color3.fromRGB(255, 225, 235))
-	petals.Parent = sky
+	-- Um emissor por cor: cada papelzinho fica de uma cor só
+	for _, color in { C.green, C.cream, C.red } do
+		local confetti = Instance.new("ParticleEmitter")
+		confetti.Shape = Enum.ParticleEmitterShape.Box
+		confetti.ShapeStyle = Enum.ParticleEmitterShapeStyle.Volume
+		confetti.EmissionDirection = Enum.NormalId.Bottom
+		confetti.Rate = 14
+		confetti.Lifetime = NumberRange.new(12, 16)
+		confetti.Speed = NumberRange.new(3, 6)
+		confetti.SpreadAngle = Vector2.new(30, 30)
+		confetti.Rotation = NumberRange.new(0, 360)
+		confetti.RotSpeed = NumberRange.new(-180, 180)
+		confetti.Size = NumberSequence.new(0.35)
+		confetti.LightInfluence = 0
+		confetti.Color = ColorSequence.new(color)
+		confetti.Parent = sky
+	end
 end
 
 local LobbyBuilder = {}
@@ -339,7 +385,7 @@ function LobbyBuilder.build(): Pad
 	buildLighting()
 	buildGround(folder)
 	buildSpawn(folder)
-	buildTemple(folder)
+	buildLandmark(folder)
 	local pad = buildPad(folder)
 	buildDecor(folder)
 	return pad

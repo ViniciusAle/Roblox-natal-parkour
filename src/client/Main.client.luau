@@ -21,9 +21,14 @@ local Hud = require(script.Parent.Hud)
 local Input = require(script.Parent.Input)
 local Music = require(script.Parent.Music)
 local RunSession = require(script.Parent.RunSession)
+local PropPool = require(script.Parent.PropPool)
+local Track = require(script.Parent.Track)
 local UiKit = require(script.Parent.UiKit)
 
-local RENDER_STEP = "AnimeRacersRun"
+local RENDER_STEP = "BrainrotRushRun"
+-- No Studio, frames lentos da corrida vão para o Output com o que a pista fez no frame
+local LAG_LOG = GameConfig.Dev.LagLogInStudio and RunService:IsStudio()
+local LAG_LOG_FRAME = 1 / 30 -- segundos
 local MATCH_REFRESH = 0.25
 
 type Mode = "Lobby" | "Solo" | "Race"
@@ -118,9 +123,22 @@ local function beginSession(loadout: Types.RunLoadout, options: RunSession.Optio
 	hud:setStandings(nil)
 	hud:setSpectating(nil)
 	RunService:BindToRenderStep(RENDER_STEP, Enum.RenderPriority.Camera.Value + 1, function(dt: number)
+		local started = os.clock()
 		newSession:update(dt)
 		if mode == "Race" then
 			raceTick(newSession, dt)
+		end
+		if LAG_LOG then
+			-- Frame lento: mostra quanto foi do nosso código e o que a pista fez nele
+			local stats = Track.stats
+			if dt > LAG_LOG_FRAME then
+				print(
+					`[Lag] frame {math.floor(dt * 1000)} ms | script {math.floor((os.clock() - started) * 1000)} ms`
+						.. ` | chunks {stats.chunks} | props {stats.props} | clones {PropPool.clones}`
+				)
+			end
+			stats.chunks, stats.props = 0, 0
+			PropPool.clones = 0
 		end
 	end)
 end
@@ -186,6 +204,11 @@ hud = Hud.new({
 	ability = function()
 		if session then
 			session:press("Ability")
+		end
+	end,
+	transform = function()
+		if session then
+			session:press("Transform")
 		end
 	end,
 })
@@ -265,6 +288,8 @@ if clickId and clickId ~= "" then
 	UiKit.setClickSound(click)
 end
 
+-- Clona os modelos das fases aos poucos enquanto o jogador está no lobby (evita travar ao entrar na corrida)
+Track.prewarm()
 Remotes.selectHero():FireServer(heroId())
 refreshLobby()
 Music.play("Lobby")

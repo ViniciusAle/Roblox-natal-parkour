@@ -7,7 +7,7 @@ local UserInputService = game:GetService("UserInputService")
 local Workspace = game:GetService("Workspace")
 local GameConfig = require(ReplicatedStorage.Shared.Config.GameConfig)
 
-export type Action = "Left" | "Right" | "Jump" | "Slide" | "Ability"
+export type Action = "Left" | "Right" | "Jump" | "Slide" | "Ability" | "Transform"
 
 type Handlers = {
 	onAction: (Action) -> (),

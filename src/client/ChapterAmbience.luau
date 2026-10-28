@@ -8,7 +8,7 @@ local TweenService = game:GetService("TweenService")
 local Themes = require(ReplicatedStorage.Shared.Config.Themes)
 
 local BLEND = TweenInfo.new(1.2, Enum.EasingStyle.Sine)
-local FX_NAME = "AnimeRacersFx"
+local FX_NAME = "BrainrotRushFx"
 
 type Snapshot = {
 	clockTime: number,

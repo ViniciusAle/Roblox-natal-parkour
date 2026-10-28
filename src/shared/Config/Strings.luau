@@ -1,10 +1,10 @@
 --!strict
 -- Textos do jogo. Idioma final em aberto: pt-BR é provisório.
--- Nome do jogo ("Anime Racers") e nomes dos personagens e biomas também são provisórios.
+-- Nome do jogo ("Brainrot Rush") e nomes dos personagens e biomas também são provisórios.
 
 local Strings = {
-	Title = "Anime Racers",
-	TitleTagline = "Corra. Desvie. Seja lendário.",
+	Title = "Brainrot Rush",
+	TitleTagline = "Corra. Desvie. Fique maluco.",
 	TapToStart = "TOQUE PARA COMEÇAR",
 	Run = "CORRER",
 	RunAgain = "CORRER DE NOVO",
@@ -23,8 +23,12 @@ local Strings = {
 	ResultBest = "Recorde: %d m",
 	NewBest = "Novo recorde!",
 	Ability = "PODER",
+	Energy = "CAOS",
+	Transform = "MODO BRAINROT",
+	Transformed = "MODO BRAINROT!",
+	Blasted = "SPLASH!",
 	Solo = "JOGAR SOLO",
-	BackToVillage = "VOLTAR À VILA",
+	BackToVillage = "VOLTAR À PRAÇA",
 	HeroLabel = "Personagem",
 	ChapterLabel = "Fase (solo)",
 	Go = "JÁ!",
@@ -54,11 +58,11 @@ local Strings = {
 	},
 
 	Heroes = {
-		Riku = "Riku",
-		Hana = "Hana",
-		Gorou = "Gorou",
-		Ryuga = "Ryuga",
-		Akari = "Akari",
+		BrrBrrPatapim = "Brr Brr Patapim",
+		BallerinaCappuccina = "Ballerina Cappuccina",
+		TungTungSahur = "Tung Tung Tung Sahur",
+		TralaleroTralala = "Tralalero Tralala",
+		BombardiroCrocodilo = "Bombardiro Crocodilo",
 	} :: { [string]: string },
 
 	Rarities = {
@@ -70,9 +74,9 @@ local Strings = {
 	} :: { [string]: string },
 
 	Chapters = {
-		NinjaVillage = "Vila Ninja",
-		HarborVillage = "Vila do Porto",
-		AlienPlanet = "Planeta Verde",
+		PizzaPiazza = "Piazza Pizza",
+		BananaBeach = "Spiaggia Banana",
+		ChaosCosmos = "Cosmo Caotico",
 	} :: { [string]: string },
 
 	PowerUps = {
@@ -80,9 +84,11 @@ local Strings = {
 		Shield = "Escudo",
 		DoubleCoins = "Moedas x2",
 		Skates = "Turbo",
-		Dash = "Investida",
-		Smash = "Esmagar",
-		TimeSlow = "Câmera lenta",
+		Dash = "Pirueta turbo",
+		Smash = "Tacada Sahur",
+		TimeSlow = "Tralala lento",
+		EnergyBlast = "Bombardeio",
+		Transform = "Modo brainrot",
 	} :: { [string]: string },
 }
 

@@ -1,6 +1,6 @@
 # Documento de Design do Jogo: O Livro de Natal (Roblox)
 
-> **Atualização de 28/10/2026:** o tema mudou de Natal para anime. O nome provisório agora é "Anime Racers", a pista tem 5 pistas e os perseguidores estão desligados por enquanto. Personagens, fases e estilo novos estão em `docs/STYLE.md` e `docs/STATUS.md`. As regras de jogo, justiça da pista, servidor autoritativo e arquitetura deste documento continuam valendo.
+> **Atualização de 28/10/2026:** o tema mudou de Natal para anime e, no mesmo dia, de anime para brainrot (personagens originais, por causa de direitos autorais). O nome provisório agora é "Brainrot Rush", a pista tem 5 pistas e os perseguidores estão desligados por enquanto. Personagens, fases e estilo novos estão em `docs/STYLE.md` e `docs/STATUS.md`. As regras de jogo, justiça da pista, servidor autoritativo e arquitetura deste documento continuam valendo.
 
 Oct 27, 2026 · @Euclides
 

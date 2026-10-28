@@ -21,6 +21,8 @@ local Sounds = {
 		Trampoline = id(91645115774690), -- Retro Jump
 		PageTurn = id(94077390731779), -- Cinematic Riser (troca de fase)
 		UiClick = id(138409154614452), -- Toggle Click
+		Transform = id(93488774972627), -- Thunder Crack (entrada no modo brainrot)
+		Blast = id(111344440939396), -- Blaster Burst (jato d'água)
 	} :: { [string]: string },
 
 	-- Volume de cada efeito (1 = original)
@@ -34,10 +36,10 @@ local Sounds = {
 
 	-- Música em loop: uma por fase e uma da vila (licenciadas para uso no Roblox)
 	Music = {
-		Lobby = id(103415687572371), -- Skybreaker Drums | Anime Taiko Festival (Zevirael)
-		NinjaVillage = id(78774174469261), -- Dojo (World Instrumentals)
-		HarborVillage = id(113350352864218), -- Adventure Island (FreeMind619)
-		AlienPlanet = id(78137697592534), -- Soft Echoes (Mylesxiety)
+		Lobby = id(1839408249), -- Italian Accordion (APM Music)
+		PizzaPiazza = id(9043154320), -- Today Tarantella (APM Music)
+		BananaBeach = id(105930077937035), -- funny bouncy upbeat sunny positive (DistroKid)
+		ChaosCosmos = id(1843075656), -- Techno Vibe (APM Music)
 	} :: { [string]: string },
 
 	MusicVolume = 0.35,
